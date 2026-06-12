@@ -480,10 +480,10 @@
   </div>
 
   <script>
-    // Apps Script 배포 URL을 여기에 붙여넣으세요.
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/a/macros/medihouse.kr/s/AKfycbyUsWuU2_YDF_32ipYX3DaRg9FA5Rc031H8NrdcCOB9i8Dqy20h3do-bJxJ3i_ddec18A/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUsWuU2_YDF_32ipYX3DaRg9FA5Rc031H8NrdcCOB9i8Dqy20h3do-bJxJ3i_ddec18A/exec";
 
     const HEADERS = ["상담ID", "접수일시", "문의유형", "세부카테고리", "상태", "우선순위", "담당자", "병원/기관명", "지역", "문의자명", "직함/역할", "연락처", "이메일", "선호 연락시간", "유입경로", "개인정보동의", "상담내용", "니즈 요약", "다음 액션", "다음 연락일", "전환가능성", "예상매출", "최종결과", "비고", "MSO_관심분야", "MSO_의사결정권자", "MSO_홈페이지/랜딩보유", "MSO_광고운영여부", "MSO_월광고비", "MSO_현재문제", "MSO_요청범위", "MSO_희망시작일", "MSO_예산범위", "MSO_첨부/레퍼런스", "교육_과정", "교육_의사면허유무", "교육_면허번호", "교육_전공/진료과", "교육_경력", "교육_소속병원형태", "교육_술기경험", "교육_희망일정", "교육_교육목적", "교육_확인상태"];
+
     const typeSelect = document.getElementById("inquiryType");
     const detailSelect = document.getElementById("detailCategory");
     const msoSection = document.getElementById("msoSection");
@@ -498,6 +498,7 @@
     function updateTypeUI() {
       const type = typeSelect.value;
       detailSelect.innerHTML = "";
+
       const first = document.createElement("option");
       first.value = "";
       first.textContent = type ? "선택" : "문의유형을 먼저 선택";
@@ -512,33 +513,35 @@
 
       msoSection.classList.toggle("hide", type !== "MSO");
       eduSection.classList.toggle("hide", type !== "의학교육");
-
-      document.querySelector('[name="MSO_관심분야"]').value = type === "MSO" ? "" : "";
-      document.querySelector('[name="교육_과정"]').value = type === "의학교육" ? "" : "";
     }
 
     typeSelect.addEventListener("change", updateTypeUI);
 
     document.getElementById("crmForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const form = e.currentTarget;
       result.className = "result";
       result.textContent = "";
 
       if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
         result.className = "result err";
-        result.innerHTML = "아직 Google Apps Script URL이 입력되지 않았습니다.<br>HTML 파일 상단 스크립트의 <b>GOOGLE_SCRIPT_URL</b> 값을 배포 URL로 바꿔주세요.";
+        result.innerHTML = "아직 Google Apps Script URL이 입력되지 않았습니다.<br>HTML 파일 하단 스크립트의 <b>GOOGLE_SCRIPT_URL</b> 값을 배포 URL로 바꿔주세요.";
         return;
       }
 
-      const fd = new FormData(e.currentTarget);
+      const fd = new FormData(form);
       const data = Object.fromEntries(fd.entries());
       data["접수일시"] = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).replace("T", " ");
 
-      // 세부카테고리 값을 전용 필드에도 복사
-      if (data["문의유형"] === "MSO") data["MSO_관심분야"] = data["MSO_관심분야"] || data["세부카테고리"];
-      if (data["문의유형"] === "의학교육") data["교육_과정"] = data["교육_과정"] || data["세부카테고리"];
+      if (data["문의유형"] === "MSO") {
+        data["MSO_관심분야"] = data["MSO_관심분야"] || data["세부카테고리"];
+      }
 
-      // 구글시트 헤더 순서와 맞추기
+      if (data["문의유형"] === "의학교육") {
+        data["교육_과정"] = data["교육_과정"] || data["세부카테고리"];
+      }
+
       const payload = {};
       HEADERS.forEach(h => payload[h] = data[h] || "");
 
@@ -552,8 +555,9 @@
 
         result.className = "result ok";
         result.textContent = "저장 요청이 전송되었습니다. 구글시트에서 접수 내역을 확인해주세요.";
-        e.currentTarget.reset();
+        form.reset();
         updateTypeUI();
+
       } catch (err) {
         result.className = "result err";
         result.textContent = "저장 중 오류가 발생했습니다: " + err.message;
