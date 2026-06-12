@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>메디하우스 CRM 상담 접수</title>
+
   <style>
     :root {
       --main: #174E4F;
@@ -16,18 +17,24 @@
       --edu: #5A4B81;
       --danger: #B91C1C;
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
       background: linear-gradient(180deg, #EFF6F5 0%, #FFFFFF 42%);
       color: var(--text);
     }
+
     .wrap {
       max-width: 1080px;
       margin: 0 auto;
       padding: 36px 20px 56px;
     }
+
     .hero {
       background: var(--main);
       color: #fff;
@@ -35,17 +42,20 @@
       padding: 30px;
       box-shadow: 0 18px 45px rgba(23,78,79,.18);
     }
+
     .hero h1 {
       margin: 0 0 8px;
       font-size: 28px;
       letter-spacing: -0.03em;
     }
+
     .hero p {
       margin: 0;
       opacity: .9;
       line-height: 1.6;
       font-size: 15px;
     }
+
     .notice {
       margin: 18px 0 24px;
       background: #fff;
@@ -56,6 +66,7 @@
       line-height: 1.6;
       font-size: 14px;
     }
+
     form {
       background: #fff;
       border: 1px solid var(--line);
@@ -63,11 +74,13 @@
       padding: 26px;
       box-shadow: 0 12px 30px rgba(15, 23, 42, .06);
     }
+
     fieldset {
       border: 0;
       padding: 0;
       margin: 0 0 28px;
     }
+
     legend {
       width: 100%;
       display: flex;
@@ -78,6 +91,7 @@
       font-size: 18px;
       letter-spacing: -0.02em;
     }
+
     legend::before {
       content: "";
       display: inline-block;
@@ -86,18 +100,27 @@
       border-radius: 999px;
       background: var(--main2);
     }
-    .mso legend::before { background: var(--mso); }
-    .edu legend::before { background: var(--edu); }
+
+    .mso legend::before {
+      background: var(--mso);
+    }
+
+    .edu legend::before {
+      background: var(--edu);
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
+
     .grid3 {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 16px;
     }
+
     label {
       display: block;
       font-size: 13px;
@@ -105,11 +128,15 @@
       margin-bottom: 7px;
       color: #374151;
     }
+
     .req::after {
       content: " *";
       color: var(--danger);
     }
-    input, select, textarea {
+
+    input,
+    select,
+    textarea {
       width: 100%;
       border: 1px solid #CBD5D6;
       border-radius: 12px;
@@ -119,23 +146,35 @@
       background: #fff;
       transition: border-color .15s, box-shadow .15s;
     }
-    input:focus, select:focus, textarea:focus {
+
+    input:focus,
+    select:focus,
+    textarea:focus {
       border-color: var(--main2);
       box-shadow: 0 0 0 4px rgba(47,111,115,.12);
     }
+
     textarea {
       min-height: 110px;
       resize: vertical;
       line-height: 1.6;
     }
-    .full { grid-column: 1 / -1; }
-    .hide { display: none; }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .hide {
+      display: none;
+    }
+
     .help {
       margin-top: 6px;
       font-size: 12px;
       color: var(--muted);
       line-height: 1.5;
     }
+
     .actions {
       display: flex;
       gap: 12px;
@@ -144,6 +183,7 @@
       border-top: 1px solid var(--line);
       padding-top: 20px;
     }
+
     button {
       border: 0;
       border-radius: 14px;
@@ -152,14 +192,17 @@
       cursor: pointer;
       font-size: 14px;
     }
+
     .primary {
       background: var(--main);
       color: #fff;
     }
+
     .secondary {
       background: #EEF3F3;
       color: var(--main);
     }
+
     .result {
       margin-top: 16px;
       padding: 14px 16px;
@@ -168,41 +211,58 @@
       line-height: 1.55;
       font-size: 14px;
     }
+
     .result.ok {
       display: block;
       background: #ECFDF3;
       color: #166534;
       border: 1px solid #BBF7D0;
     }
+
     .result.err {
       display: block;
       background: #FEF2F2;
       color: #991B1B;
       border: 1px solid #FECACA;
     }
+
     @media (max-width: 760px) {
-      .grid, .grid3 { grid-template-columns: 1fr; }
-      .hero { padding: 24px; }
-      form { padding: 20px; }
-      .actions { flex-direction: column-reverse; align-items: stretch; }
+      .grid,
+      .grid3 {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 24px;
+      }
+
+      form {
+        padding: 20px;
+      }
+
+      .actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <section class="hero">
       <h1>메디하우스 CRM 상담 접수</h1>
-      <p>MSO 문의와 의학교육 문의를 구분해 접수하는 내부 상담 입력폼입니다. 제출된 내용은 Google Apps Script를 통해 구글시트에 누적 저장할 수 있습니다.</p>
+      <p>MSO 문의와 의학교육 문의를 구분해 접수하는 내부 상담 입력폼입니다. 제출된 내용은 구글시트 CRM_입력 시트에 저장됩니다.</p>
     </section>
 
     <div class="notice">
-      <strong>연동 전 확인:</strong> 아래 코드의 <code>GOOGLE_SCRIPT_URL</code>에 Apps Script 웹 앱 URL을 넣으면 제출 데이터가 구글시트로 저장됩니다.
-      의학교육은 의사 대상 교육이므로 면허 유무와 전공/경력 확인 항목을 반드시 관리하세요.
+      <strong>입력 안내:</strong> 의학교육 문의는 의사 대상 교육이므로 면허 유무, 전공, 경력 확인 항목을 반드시 관리해주세요.
     </div>
 
     <form id="crmForm">
       <fieldset>
         <legend>공통 상담 정보</legend>
+
         <div class="grid3">
           <div>
             <label class="req">문의유형</label>
@@ -212,12 +272,14 @@
               <option value="의학교육">의학교육</option>
             </select>
           </div>
+
           <div>
             <label class="req">세부카테고리</label>
             <select name="세부카테고리" id="detailCategory" required>
               <option value="">문의유형을 먼저 선택</option>
             </select>
           </div>
+
           <div>
             <label>상태</label>
             <select name="상태">
@@ -244,17 +306,28 @@
               <option>하</option>
             </select>
           </div>
+
           <div>
             <label>담당자</label>
             <input name="담당자" placeholder="예: 박지원" />
           </div>
+
           <div>
             <label>유입경로</label>
             <select name="유입경로">
               <option value="">선택</option>
-              <option>홈페이지</option><option>랜딩페이지</option><option>네이버 검색</option><option>네이버 광고</option>
-              <option>구글 광고</option><option>인스타그램</option><option>블로그</option><option>유튜브</option>
-              <option>기존 회원</option><option>지인 소개</option><option>문자/알림톡</option><option>기타</option>
+              <option>홈페이지</option>
+              <option>랜딩페이지</option>
+              <option>네이버 검색</option>
+              <option>네이버 광고</option>
+              <option>구글 광고</option>
+              <option>인스타그램</option>
+              <option>블로그</option>
+              <option>유튜브</option>
+              <option>기존 회원</option>
+              <option>지인 소개</option>
+              <option>문자/알림톡</option>
+              <option>기타</option>
             </select>
           </div>
         </div>
@@ -264,34 +337,48 @@
             <label class="req">병원/기관명</label>
             <input name="병원/기관명" required placeholder="예: ○○내과의원" />
           </div>
+
           <div>
             <label>지역</label>
             <input name="지역" placeholder="예: 서울 강남구 / 세종" />
           </div>
+
           <div>
             <label class="req">문의자명</label>
             <input name="문의자명" required />
           </div>
+
           <div>
             <label>직함/역할</label>
             <select name="직함/역할">
               <option value="">선택</option>
-              <option>의사</option><option>병원장</option><option>직원</option><option>코디네이터</option>
-              <option>원무</option><option>간호사</option><option>방사선사</option><option>마케팅 담당자</option><option>기타</option>
+              <option>의사</option>
+              <option>병원장</option>
+              <option>직원</option>
+              <option>코디네이터</option>
+              <option>원무</option>
+              <option>간호사</option>
+              <option>방사선사</option>
+              <option>마케팅 담당자</option>
+              <option>기타</option>
             </select>
           </div>
+
           <div>
             <label class="req">연락처</label>
             <input name="연락처" required placeholder="010-0000-0000" />
           </div>
+
           <div>
             <label>이메일</label>
             <input name="이메일" type="email" placeholder="name@example.com" />
           </div>
+
           <div>
             <label>선호 연락시간</label>
             <input name="선호 연락시간" placeholder="예: 평일 17시 이후" />
           </div>
+
           <div>
             <label class="req">개인정보동의</label>
             <select name="개인정보동의" required>
@@ -301,69 +388,101 @@
               <option>확인필요</option>
             </select>
           </div>
+
           <div class="full">
             <label class="req">상담내용</label>
             <textarea name="상담내용" required placeholder="문의 배경, 원하는 서비스/교육, 현재 상황을 입력하세요."></textarea>
           </div>
+
           <div class="full">
             <label>니즈 요약</label>
-            <textarea name="니즈 요약" placeholder="상담자가 정리하는 핵심 니즈. 예: 신규환자 유입, 홈페이지 개편, 위내시경 실습 교육 희망 등"></textarea>
+            <textarea name="니즈 요약" placeholder="상담자가 정리하는 핵심 니즈를 입력하세요."></textarea>
           </div>
         </div>
       </fieldset>
 
       <fieldset id="msoSection" class="mso hide">
         <legend>MSO 전용 정보</legend>
+
         <div class="grid3">
           <div>
             <label>MSO 관심분야</label>
             <select name="MSO_관심분야">
               <option value="">선택</option>
-              <option>마케팅</option><option>디자인</option><option>CS교육</option><option>운영</option>
+              <option>마케팅</option>
+              <option>디자인</option>
+              <option>CS교육</option>
+              <option>운영</option>
             </select>
           </div>
+
           <div>
             <label>의사결정권자</label>
             <select name="MSO_의사결정권자">
               <option value="">선택</option>
-              <option>본인</option><option>병원장</option><option>대표원장</option><option>행정/원무 책임자</option><option>마케팅 담당자</option><option>확인필요</option>
+              <option>본인</option>
+              <option>병원장</option>
+              <option>대표원장</option>
+              <option>행정/원무 책임자</option>
+              <option>마케팅 담당자</option>
+              <option>확인필요</option>
             </select>
           </div>
+
           <div>
             <label>홈페이지/랜딩 보유</label>
             <select name="MSO_홈페이지/랜딩보유">
-              <option value="">선택</option><option>있음</option><option>없음</option><option>확인필요</option>
+              <option value="">선택</option>
+              <option>있음</option>
+              <option>없음</option>
+              <option>확인필요</option>
             </select>
           </div>
+
           <div>
             <label>광고 운영 여부</label>
             <select name="MSO_광고운영여부">
-              <option value="">선택</option><option>운영중</option><option>운영경험 있음</option><option>운영 안함</option><option>확인필요</option>
+              <option value="">선택</option>
+              <option>운영중</option>
+              <option>운영경험 있음</option>
+              <option>운영 안함</option>
+              <option>확인필요</option>
             </select>
           </div>
+
           <div>
             <label>월 광고비</label>
             <input name="MSO_월광고비" placeholder="예: 300만원" />
           </div>
+
           <div>
             <label>예산 범위</label>
             <select name="MSO_예산범위">
-              <option value="">선택</option><option>100만원 미만</option><option>100~300만원</option><option>300~500만원</option>
-              <option>500~1,000만원</option><option>1,000만원 이상</option><option>확인필요</option>
+              <option value="">선택</option>
+              <option>100만원 미만</option>
+              <option>100~300만원</option>
+              <option>300~500만원</option>
+              <option>500~1,000만원</option>
+              <option>1,000만원 이상</option>
+              <option>확인필요</option>
             </select>
           </div>
+
           <div class="full">
             <label>현재 문제</label>
-            <textarea name="MSO_현재문제" placeholder="예: 광고 효율 저하, 홈페이지 전환율 낮음, 상담 응대 표준화 필요, 운영 프로세스 정리 필요"></textarea>
+            <textarea name="MSO_현재문제" placeholder="예: 광고 효율 저하, 홈페이지 전환율 낮음, 상담 응대 표준화 필요"></textarea>
           </div>
+
           <div class="full">
             <label>요청 범위</label>
-            <textarea name="MSO_요청범위" placeholder="예: 네이버 광고 세팅, 랜딩페이지 제작, 블로그 운영, CS 스크립트, 부서 매뉴얼, 운영 컨설팅"></textarea>
+            <textarea name="MSO_요청범위" placeholder="예: 네이버 광고 세팅, 랜딩페이지 제작, 블로그 운영, CS 스크립트"></textarea>
           </div>
+
           <div>
             <label>희망 시작일</label>
             <input name="MSO_희망시작일" type="date" />
           </div>
+
           <div>
             <label>첨부/레퍼런스</label>
             <input name="MSO_첨부/레퍼런스" placeholder="URL 또는 참고 내용" />
@@ -373,17 +492,21 @@
 
       <fieldset id="eduSection" class="edu hide">
         <legend>의학교육 전용 정보</legend>
+
         <div class="grid3">
           <div>
             <label>교육 과정</label>
             <select name="교육_과정">
               <option value="">선택</option>
-              <option>위내시경</option><option>FNA</option><option>CNB</option>
+              <option>위내시경</option>
+              <option>FNA</option>
+              <option>CNB</option>
             </select>
           </div>
+
           <div>
-            <label class="req">의사면허 유무</label>
-            <select name="교육_의사면허유무" id="licenseStatus">
+            <label>의사면허 유무</label>
+            <select name="교육_의사면허유무">
               <option value="">선택</option>
               <option>의사면허 보유</option>
               <option>면허 확인 필요</option>
@@ -391,79 +514,132 @@
             </select>
             <div class="help">의학교육은 의사 대상 교육이므로 면허 확인 상태를 관리하세요.</div>
           </div>
+
           <div>
             <label>면허번호</label>
-            <input name="교육_면허번호" placeholder="내부 확인용, 접근권한 관리 필요" />
+            <input name="교육_면허번호" placeholder="내부 확인용" />
           </div>
+
           <div>
             <label>전공/진료과</label>
             <select name="교육_전공/진료과">
-              <option value="">선택</option><option>내과</option><option>외과</option><option>영상의학과</option><option>가정의학과</option>
-              <option>산부인과</option><option>피부과</option><option>이비인후과</option><option>일반의</option><option>전공의</option><option>기타</option>
+              <option value="">선택</option>
+              <option>내과</option>
+              <option>외과</option>
+              <option>영상의학과</option>
+              <option>가정의학과</option>
+              <option>산부인과</option>
+              <option>피부과</option>
+              <option>이비인후과</option>
+              <option>일반의</option>
+              <option>전공의</option>
+              <option>기타</option>
             </select>
           </div>
+
           <div>
             <label>경력</label>
             <select name="교육_경력">
-              <option value="">선택</option><option>1년 미만</option><option>1~3년</option><option>3~5년</option><option>5~10년</option><option>10년 이상</option>
+              <option value="">선택</option>
+              <option>1년 미만</option>
+              <option>1~3년</option>
+              <option>3~5년</option>
+              <option>5~10년</option>
+              <option>10년 이상</option>
             </select>
           </div>
+
           <div>
             <label>소속병원 형태</label>
             <select name="교육_소속병원형태">
-              <option value="">선택</option><option>의원</option><option>병원</option><option>종합병원</option><option>상급종합병원</option><option>검진센터</option><option>개원예정</option><option>기타</option>
+              <option value="">선택</option>
+              <option>의원</option>
+              <option>병원</option>
+              <option>종합병원</option>
+              <option>상급종합병원</option>
+              <option>검진센터</option>
+              <option>개원예정</option>
+              <option>기타</option>
             </select>
           </div>
+
           <div>
             <label>술기 경험</label>
             <select name="교육_술기경험">
-              <option value="">선택</option><option>없음</option><option>참관 경험</option><option>기초 가능</option><option>실무 중</option><option>고급/심화 희망</option>
+              <option value="">선택</option>
+              <option>없음</option>
+              <option>참관 경험</option>
+              <option>기초 가능</option>
+              <option>실무 중</option>
+              <option>고급/심화 희망</option>
             </select>
           </div>
+
           <div>
             <label>희망 일정</label>
             <input name="교육_희망일정" placeholder="예: 7월 주말 / 가장 빠른 일정" />
           </div>
+
           <div>
             <label>확인상태</label>
             <select name="교육_확인상태">
-              <option>면허 확인 전</option><option>면허 확인 완료</option><option>대상자 적합</option><option>추가 확인 필요</option><option>비대상</option>
+              <option>면허 확인 전</option>
+              <option>면허 확인 완료</option>
+              <option>대상자 적합</option>
+              <option>추가 확인 필요</option>
+              <option>비대상</option>
             </select>
           </div>
+
           <div class="full">
             <label>교육 목적</label>
-            <textarea name="교육_교육목적" placeholder="예: 개원 전 술기 습득, 검진센터 내시경 역량 강화, 유방 FNA/CNB 실습 희망 등"></textarea>
+            <textarea name="교육_교육목적" placeholder="예: 개원 전 술기 습득, 검진센터 내시경 역량 강화"></textarea>
           </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>상담 후속관리</legend>
+
         <div class="grid3">
           <div>
             <label>다음 액션</label>
             <input name="다음 액션" placeholder="예: 회원가입 요청 문자 발송" />
           </div>
+
           <div>
             <label>다음 연락일</label>
             <input name="다음 연락일" type="date" />
           </div>
+
           <div>
             <label>전환가능성</label>
             <select name="전환가능성">
-              <option value="">선택</option><option>상</option><option>중</option><option>하</option><option>확인필요</option>
+              <option value="">선택</option>
+              <option>상</option>
+              <option>중</option>
+              <option>하</option>
+              <option>확인필요</option>
             </select>
           </div>
+
           <div>
             <label>예상매출</label>
             <input name="예상매출" placeholder="예: 160만원 / 월 300만원" />
           </div>
+
           <div>
             <label>최종결과</label>
             <select name="최종결과">
-              <option>진행중</option><option>전환완료</option><option>미전환</option><option>재문의 예정</option><option>부적합</option><option>중복</option>
+              <option>진행중</option>
+              <option>전환완료</option>
+              <option>미전환</option>
+              <option>재문의 예정</option>
+              <option>부적합</option>
+              <option>중복</option>
             </select>
           </div>
+
           <div>
             <label>비고</label>
             <input name="비고" placeholder="내부 메모" />
@@ -472,9 +648,10 @@
       </fieldset>
 
       <div class="actions">
-        <button type="reset" class="secondary">초기화</button>
+        <button type="button" class="secondary" id="clearBtn">초기화</button>
         <button type="submit" class="primary">CRM 상담 접수 저장</button>
       </div>
+
       <div id="result" class="result"></div>
     </form>
   </div>
@@ -482,13 +659,60 @@
   <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUsWuU2_YDF_32ipYX3DaRg9FA5Rc031H8NrdcCOB9i8Dqy20h3do-bJxJ3i_ddec18A/exec";
 
-    const HEADERS = ["상담ID", "접수일시", "문의유형", "세부카테고리", "상태", "우선순위", "담당자", "병원/기관명", "지역", "문의자명", "직함/역할", "연락처", "이메일", "선호 연락시간", "유입경로", "개인정보동의", "상담내용", "니즈 요약", "다음 액션", "다음 연락일", "전환가능성", "예상매출", "최종결과", "비고", "MSO_관심분야", "MSO_의사결정권자", "MSO_홈페이지/랜딩보유", "MSO_광고운영여부", "MSO_월광고비", "MSO_현재문제", "MSO_요청범위", "MSO_희망시작일", "MSO_예산범위", "MSO_첨부/레퍼런스", "교육_과정", "교육_의사면허유무", "교육_면허번호", "교육_전공/진료과", "교육_경력", "교육_소속병원형태", "교육_술기경험", "교육_희망일정", "교육_교육목적", "교육_확인상태"];
+    const HEADERS = [
+      "상담ID",
+      "접수일시",
+      "문의유형",
+      "세부카테고리",
+      "상태",
+      "우선순위",
+      "담당자",
+      "병원/기관명",
+      "지역",
+      "문의자명",
+      "직함/역할",
+      "연락처",
+      "이메일",
+      "선호 연락시간",
+      "유입경로",
+      "개인정보동의",
+      "상담내용",
+      "니즈 요약",
+      "다음 액션",
+      "다음 연락일",
+      "전환가능성",
+      "예상매출",
+      "최종결과",
+      "비고",
+      "MSO_관심분야",
+      "MSO_의사결정권자",
+      "MSO_홈페이지/랜딩보유",
+      "MSO_광고운영여부",
+      "MSO_월광고비",
+      "MSO_현재문제",
+      "MSO_요청범위",
+      "MSO_희망시작일",
+      "MSO_예산범위",
+      "MSO_첨부/레퍼런스",
+      "교육_과정",
+      "교육_의사면허유무",
+      "교육_면허번호",
+      "교육_전공/진료과",
+      "교육_경력",
+      "교육_소속병원형태",
+      "교육_술기경험",
+      "교육_희망일정",
+      "교육_교육목적",
+      "교육_확인상태"
+    ];
 
     const typeSelect = document.getElementById("inquiryType");
     const detailSelect = document.getElementById("detailCategory");
     const msoSection = document.getElementById("msoSection");
     const eduSection = document.getElementById("eduSection");
     const result = document.getElementById("result");
+    const crmForm = document.getElementById("crmForm");
+    const clearBtn = document.getElementById("clearBtn");
 
     const categories = {
       "MSO": ["마케팅", "디자인", "CS교육", "운영"],
@@ -497,6 +721,7 @@
 
     function updateTypeUI() {
       const type = typeSelect.value;
+
       detailSelect.innerHTML = "";
 
       const first = document.createElement("option");
@@ -504,35 +729,63 @@
       first.textContent = type ? "선택" : "문의유형을 먼저 선택";
       detailSelect.appendChild(first);
 
-      (categories[type] || []).forEach(v => {
+      const list = categories[type] || [];
+
+      list.forEach(function(value) {
         const opt = document.createElement("option");
-        opt.value = v;
-        opt.textContent = v;
+        opt.value = value;
+        opt.textContent = value;
         detailSelect.appendChild(opt);
       });
 
-      msoSection.classList.toggle("hide", type !== "MSO");
-      eduSection.classList.toggle("hide", type !== "의학교육");
+      if (type === "MSO") {
+        msoSection.classList.remove("hide");
+        eduSection.classList.add("hide");
+      } else if (type === "의학교육") {
+        eduSection.classList.remove("hide");
+        msoSection.classList.add("hide");
+      } else {
+        msoSection.classList.add("hide");
+        eduSection.classList.add("hide");
+      }
+    }
+
+    function showMessage(type, message) {
+      result.className = "result " + type;
+      result.innerHTML = message;
+    }
+
+    function clearMessage() {
+      result.className = "result";
+      result.innerHTML = "";
     }
 
     typeSelect.addEventListener("change", updateTypeUI);
 
-    document.getElementById("crmForm").addEventListener("submit", async (e) => {
+    clearBtn.addEventListener("click", function() {
+      crmForm.reset();
+      updateTypeUI();
+      clearMessage();
+    });
+
+    crmForm.addEventListener("submit", async function(e) {
       e.preventDefault();
 
-      const form = e.currentTarget;
-      result.className = "result";
-      result.textContent = "";
+      clearMessage();
 
       if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
-        result.className = "result err";
-        result.innerHTML = "아직 Google Apps Script URL이 입력되지 않았습니다.<br>HTML 파일 하단 스크립트의 <b>GOOGLE_SCRIPT_URL</b> 값을 배포 URL로 바꿔주세요.";
+        showMessage("err", "아직 Google Apps Script URL이 입력되지 않았습니다.<br>HTML 하단 스크립트의 <b>GOOGLE_SCRIPT_URL</b> 값을 배포 URL로 바꿔주세요.");
         return;
       }
 
-      const fd = new FormData(form);
+      const fd = new FormData(crmForm);
       const data = Object.fromEntries(fd.entries());
-      data["접수일시"] = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).replace("T", " ");
+
+      data["접수일시"] = new Date().toLocaleString("sv-SE", {
+        timeZone: "Asia/Seoul"
+      }).replace("T", " ");
+
+      data["상담ID"] = "CRM-" + Date.now();
 
       if (data["문의유형"] === "MSO") {
         data["MSO_관심분야"] = data["MSO_관심분야"] || data["세부카테고리"];
@@ -543,24 +796,27 @@
       }
 
       const payload = {};
-      HEADERS.forEach(h => payload[h] = data[h] || "");
+
+      HEADERS.forEach(function(header) {
+        payload[header] = data[header] || "";
+      });
 
       try {
         await fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           mode: "no-cors",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body: new URLSearchParams({ payload: JSON.stringify(payload) })
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          },
+          body: new URLSearchParams({
+            payload: JSON.stringify(payload)
+          })
         });
 
-        result.className = "result ok";
-        result.textContent = "저장 요청이 전송되었습니다. 구글시트에서 접수 내역을 확인해주세요.";
-        form.reset();
-        updateTypeUI();
+        showMessage("ok", "저장 요청이 전송되었습니다. 구글시트 <b>CRM_입력</b> 시트에서 접수 내역을 확인해주세요.");
 
       } catch (err) {
-        result.className = "result err";
-        result.textContent = "저장 중 오류가 발생했습니다: " + err.message;
+        showMessage("err", "저장 중 오류가 발생했습니다: " + err.message);
       }
     });
 
