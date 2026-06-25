@@ -952,45 +952,192 @@
     
  let crmListData = [];
 
+let crmListData = [];
+
 function loadCrmList() {
+  const listBox = document.getElementById("listResult");
+
+  if (!listBox) {
+    alert("listResult 영역을 찾을 수 없습니다.");
+    return;
+  }
+
   if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
-    document.getElementById("listResult").innerHTML =
+    listBox.innerHTML =
       '<div class="empty-message">Apps Script URL이 입력되지 않았습니다.</div>';
     return;
   }
 
-  document.getElementById("listResult").innerHTML =
+  listBox.innerHTML =
     '<div class="empty-message">상담 리스트를 불러오는 중입니다...</div>';
 
-  const callbackName = "crmListCallback_" + Date.now();
+  const callbackName = "crmListCallback" + Date.now();
 
   window[callbackName] = function(response) {
     try {
-      if (!response || response.result !== "success") {
-        document.getElementById("listResult").innerHTML =
-          '<div class="empty-message">상담 리스트를 불러오지 못했습니다.</div>';
+      console.log("CRM LIST RESPONSE:", response);
+
+      if (!response) {
+        listBox.innerHTML =
+          '<div class="empty-message">응답 데이터가 없습니다.</div>';
+        return;
+      }
+
+      if (response.result !== "success") {
+        listBox.innerHTML =
+          '<div class="empty-message">Apps Script 오류: ' + escapeHtml(response.message || "알 수 없는 오류") + '</div>';
         return;
       }
 
       crmListData = response.data || [];
+
+      if (crmListData.length === 0) {
+        listBox.innerHTML =
+          '<div class="empty-message">구글시트에서 불러올 CRM 상담 데이터가 없습니다.</div>';
+        return;
+      }
+
       renderCrmList();
+
+    } catch (error) {
+      listBox.innerHTML =
+        '<div class="empty-message">리스트 표시 중 오류: ' + escapeHtml(error.message) + '</div>';
 
     } finally {
       delete window[callbackName];
-      const oldScript = document.getElementById(callbackName);
-      if (oldScript) oldScript.remove();
+
+      const scriptTag = document.getElementById(callbackName);
+      if (scriptTag) {
+        scriptTag.remove();
+      }
     }
   };
 
   const script = document.createElement("script");
   script.id = callbackName;
-  script.src = GOOGLE_SCRIPT_URL
-    + "?action=list"
-    + "&callback=" + callbackName
-    + "&t=" + Date.now();
+  script.src =
+    GOOGLE_SCRIPT_URL +
+    "?action=list" +
+    "&callback=" + encodeURIComponent(callbackName) +
+    "&t=" + Date.now();
+
+  script.onerror = function() {
+    listBox.innerHTML =
+      '<div class="empty-message">Apps Script 요청에 실패했습니다. GitHub HTML의 GOOGLE_SCRIPT_URL 값을 확인해주세요.</div>';
+
+    delete window[callbackName];
+  };
 
   document.body.appendChild(script);
 }
+
+
+function renderCrmList() {
+  const listBox = document.getElementById("listResult");
+
+  const typeEl = document.getElementById("filterType");
+  const statusEl = document.getElementById("filterStatus");
+  const keywordEl = document.getElementById("searchKeyword");
+
+  const type = typeEl ? typeEl.value : "";
+  const status = statusEl ? statusEl.value : "";
+  const keyword = keywordEl ? keywordEl.value.trim().toLowerCase() : "";
+
+  let list = crmListData.filter(function(item) {
+    const matchType = !type || item["문의유형"] === type;
+    const matchStatus = !status || item["상태"] === status;
+
+    const searchText = [
+      item["상담ID"],
+      item["병원/기관명"],
+      item["문의자명"],
+      item["연락처"],
+      item["세부카테고리"],
+      item["상담내용"],
+      item["니즈 요약"]
+    ].join(" ").toLowerCase();
+
+    const matchKeyword = !keyword || searchText.includes(keyword);
+
+    return matchType && matchStatus && matchKeyword;
+  });
+
+  if (list.length === 0) {
+    listBox.innerHTML =
+      '<div class="empty-message">현재 필터 조건에 맞는 상담 데이터가 없습니다. 필터를 전체로 바꿔보세요.</div>';
+    return;
+  }
+
+  const rows = list.map(function(item) {
+    const typeClass = item["문의유형"] === "MSO" ? "badge-mso" : "badge-edu";
+
+    return `
+      <tr>
+        <td>${escapeHtml(item["접수일시"])}</td>
+        <td><span class="badge ${typeClass}">${escapeHtml(item["문의유형"])}</span></td>
+        <td>${escapeHtml(item["세부카테고리"])}</td>
+        <td>${escapeHtml(item["상태"])}</td>
+        <td>${escapeHtml(item["병원/기관명"])}</td>
+        <td>${escapeHtml(item["문의자명"])}</td>
+        <td>${escapeHtml(item["직함/역할"])}</td>
+        <td>${escapeHtml(item["연락처"])}</td>
+        <td>${escapeHtml(item["유입경로"])}</td>
+        <td>${escapeHtml(item["다음 연락일"])}</td>
+        <td>${escapeHtml(item["전환가능성"])}</td>
+        <td>${escapeHtml(item["최종결과"])}</td>
+      </tr>
+    `;
+  }).join("");
+
+  listBox.innerHTML = `
+    <table class="crm-table">
+      <thead>
+        <tr>
+          <th>접수일시</th>
+          <th>문의유형</th>
+          <th>세부</th>
+          <th>상태</th>
+          <th>병원/기관명</th>
+          <th>문의자</th>
+          <th>직함</th>
+          <th>연락처</th>
+          <th>유입경로</th>
+          <th>다음 연락일</th>
+          <th>전환가능성</th>
+          <th>최종결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
+}
+
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+document.getElementById("loadListBtn").addEventListener("click", loadCrmList);
+
+document.getElementById("filterType").addEventListener("change", function() {
+  if (crmListData.length > 0) renderCrmList();
+});
+
+document.getElementById("filterStatus").addEventListener("change", function() {
+  if (crmListData.length > 0) renderCrmList();
+});
+
+document.getElementById("searchKeyword").addEventListener("input", function() {
+  if (crmListData.length > 0) renderCrmList();
+});
 
 
 function renderCrmList() {
