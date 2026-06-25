@@ -752,7 +752,7 @@
     <section class="crm-list-box">
       <div class="list-head">
         <h2>CRM 상담 접수 리스트</h2>
-        <button type="button" class="primary" id="loadListBtn">상담 리스트 불러오기</button>
+        <button type="button" class="primary" id="loadListBtn" onclick="loadCrmList()">상담 리스트 불러오기</button>
       </div>
 
       <div class="filter-box">
@@ -980,75 +980,75 @@
     });
 
     function loadCrmList() {
-      hideDebug();
+  hideDebug();
 
-      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
-        listResult.innerHTML = '<div class="empty-message">Apps Script URL이 입력되지 않았습니다.</div>';
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
+    listResult.innerHTML = '<div class="empty-message">Apps Script URL이 입력되지 않았습니다.</div>';
+    return;
+  }
+
+  listResult.innerHTML = '<div class="empty-message">상담 리스트를 불러오는 중입니다...</div>';
+
+  const callbackName = "crmListCallback_" + Date.now();
+
+  const timeout = setTimeout(function() {
+    listResult.innerHTML = '<div class="empty-message">리스트 응답이 없습니다.<br>Apps Script URL 또는 배포 상태를 확인해주세요.</div>';
+    showDebug("요청 URL:\n" + buildListUrl(callbackName));
+    delete window[callbackName];
+
+    const oldScript = document.getElementById(callbackName);
+    if (oldScript) oldScript.remove();
+  }, 12000);
+
+  window[callbackName] = function(response) {
+    clearTimeout(timeout);
+
+    try {
+      showDebug("응답 성공:\n" + JSON.stringify(response, null, 2).slice(0, 3000));
+
+      if (!response) {
+        listResult.innerHTML = '<div class="empty-message">응답 데이터가 없습니다.</div>';
         return;
       }
 
-      listResult.innerHTML = '<div class="empty-message">상담 리스트를 불러오는 중입니다...</div>';
+      if (response.result !== "success") {
+        listResult.innerHTML = '<div class="empty-message">Apps Script 오류:<br>' + escapeHtml(response.message || "알 수 없는 오류") + '</div>';
+        return;
+      }
 
-      const callbackName = "crmListCallback_" + Date.now();
+      crmListData = response.data || [];
 
-      const timeout = setTimeout(function() {
-        listResult.innerHTML = '<div class="empty-message">리스트 응답이 없습니다.<br>Apps Script URL 또는 배포 상태를 확인해주세요.</div>';
-        showDebug("요청 URL:\n" + buildListUrl(callbackName));
-        delete window[callbackName];
+      if (crmListData.length === 0) {
+        listResult.innerHTML = '<div class="empty-message">구글시트에서 불러올 CRM 상담 데이터가 없습니다.<br>상담ID가 CRM-으로 시작하는 데이터가 있는지 확인해주세요.</div>';
+        return;
+      }
 
-        const oldScript = document.getElementById(callbackName);
-        if (oldScript) oldScript.remove();
-      }, 12000);
+      renderCrmList();
 
-      window[callbackName] = function(response) {
-        clearTimeout(timeout);
+    } catch (error) {
+      listResult.innerHTML = '<div class="empty-message">리스트 표시 중 오류:<br>' + escapeHtml(error.message) + '</div>';
 
-        try {
-          showDebug("응답 성공:\n" + JSON.stringify(response, null, 2).slice(0, 3000));
+    } finally {
+      delete window[callbackName];
 
-          if (!response) {
-            listResult.innerHTML = '<div class="empty-message">응답 데이터가 없습니다.</div>';
-            return;
-          }
-
-          if (response.result !== "success") {
-            listResult.innerHTML = '<div class="empty-message">Apps Script 오류:<br>' + escapeHtml(response.message || "알 수 없는 오류") + '</div>';
-            return;
-          }
-
-          crmListData = response.data || [];
-
-          if (crmListData.length === 0) {
-            listResult.innerHTML = '<div class="empty-message">구글시트에서 불러올 CRM 상담 데이터가 없습니다.<br>상담ID가 CRM-으로 시작하는 데이터가 있는지 확인해주세요.</div>';
-            return;
-          }
-
-          renderCrmList();
-
-        } catch (error) {
-          listResult.innerHTML = '<div class="empty-message">리스트 표시 중 오류:<br>' + escapeHtml(error.message) + '</div>';
-
-        } finally {
-          delete window[callbackName];
-
-          const scriptTag = document.getElementById(callbackName);
-          if (scriptTag) scriptTag.remove();
-        }
-      };
-
-      const script = document.createElement("script");
-      script.id = callbackName;
-      script.src = buildListUrl(callbackName);
-
-      script.onerror = function() {
-        clearTimeout(timeout);
-        listResult.innerHTML = '<div class="empty-message">Apps Script 요청에 실패했습니다.<br>GitHub HTML의 GOOGLE_SCRIPT_URL 값을 확인해주세요.</div>';
-        showDebug("요청 실패 URL:\n" + script.src);
-        delete window[callbackName];
-      };
-
-      document.body.appendChild(script);
+      const scriptTag = document.getElementById(callbackName);
+      if (scriptTag) scriptTag.remove();
     }
+  };
+
+  const script = document.createElement("script");
+  script.id = callbackName;
+  script.src = buildListUrl(callbackName);
+
+  script.onerror = function() {
+    clearTimeout(timeout);
+    listResult.innerHTML = '<div class="empty-message">Apps Script 요청에 실패했습니다.<br>GitHub HTML의 GOOGLE_SCRIPT_URL 값을 확인해주세요.</div>';
+    showDebug("요청 실패 URL:\n" + script.src);
+    delete window[callbackName];
+  };
+
+  document.body.appendChild(script);
+}
 
     function buildListUrl(callbackName) {
       return GOOGLE_SCRIPT_URL
