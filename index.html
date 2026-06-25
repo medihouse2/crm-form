@@ -16,102 +16,6 @@
       --mso: #7A5C2E;
       --edu: #5A4B81;
       --danger: #B91C1C;
-      .crm-list-box {
-  margin-top: 28px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  padding: 26px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, .06);
-}
-
-.list-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.list-head h2 {
-  margin: 0;
-  font-size: 20px;
-  letter-spacing: -0.03em;
-}
-
-.list-head button {
-  background: var(--main);
-  color: #fff;
-}
-
-.filter-box {
-  display: grid;
-  grid-template-columns: 180px 200px 1fr;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.list-result {
-  overflow-x: auto;
-  font-size: 13px;
-}
-
-.crm-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 1100px;
-}
-
-.crm-table th,
-.crm-table td {
-  border-bottom: 1px solid #E5E7EB;
-  padding: 10px 8px;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.crm-table th {
-  background: #F8FAFA;
-  font-weight: 800;
-  color: #374151;
-}
-
-.badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.badge-mso {
-  background: #FFF7E6;
-  color: #7A5C2E;
-}
-
-.badge-edu {
-  background: #F1EEFF;
-  color: #5A4B81;
-}
-
-.empty-message {
-  padding: 28px;
-  text-align: center;
-  color: var(--muted);
-  background: #F9FAFB;
-  border-radius: 14px;
-}
-
-@media (max-width: 760px) {
-  .list-head {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-box {
-    grid-template-columns: 1fr;
-  }
-}
     }
 
     * {
@@ -163,7 +67,8 @@
       font-size: 14px;
     }
 
-    form {
+    form,
+    .crm-list-box {
       background: #fff;
       border: 1px solid var(--line);
       border-radius: 22px;
@@ -322,9 +227,100 @@
       border: 1px solid #FECACA;
     }
 
+    .crm-list-box {
+      margin-top: 28px;
+    }
+
+    .list-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .list-head h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+
+    .filter-box {
+      display: grid;
+      grid-template-columns: 180px 200px 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .list-result {
+      overflow-x: auto;
+      font-size: 13px;
+    }
+
+    .crm-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+
+    .crm-table th,
+    .crm-table td {
+      border-bottom: 1px solid #E5E7EB;
+      padding: 10px 8px;
+      text-align: left;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    .crm-table th {
+      background: #F8FAFA;
+      font-weight: 800;
+      color: #374151;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badge-mso {
+      background: #FFF7E6;
+      color: #7A5C2E;
+    }
+
+    .badge-edu {
+      background: #F1EEFF;
+      color: #5A4B81;
+    }
+
+    .empty-message {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      background: #F9FAFB;
+      border-radius: 14px;
+      line-height: 1.6;
+    }
+
+    .debug-box {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #6B7280;
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
+      padding: 12px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      display: none;
+    }
+
     @media (max-width: 760px) {
       .grid,
-      .grid3 {
+      .grid3,
+      .filter-box {
         grid-template-columns: 1fr;
       }
 
@@ -332,11 +328,13 @@
         padding: 24px;
       }
 
-      form {
+      form,
+      .crm-list-box {
         padding: 20px;
       }
 
-      .actions {
+      .actions,
+      .list-head {
         flex-direction: column-reverse;
         align-items: stretch;
       }
@@ -750,38 +748,43 @@
 
       <div id="result" class="result"></div>
     </form>
+
     <section class="crm-list-box">
-  <div class="list-head">
-    <h2>CRM 상담 접수 리스트</h2>
-    <button type="button" id="loadListBtn">상담 리스트 불러오기</button>
-  </div>
+      <div class="list-head">
+        <h2>CRM 상담 접수 리스트</h2>
+        <button type="button" class="primary" id="loadListBtn">상담 리스트 불러오기</button>
+      </div>
 
-  <div class="filter-box">
-    <select id="filterType">
-      <option value="">전체 문의유형</option>
-      <option value="MSO">MSO</option>
-      <option value="의학교육">의학교육</option>
-    </select>
+      <div class="filter-box">
+        <select id="filterType">
+          <option value="">전체 문의유형</option>
+          <option value="MSO">MSO</option>
+          <option value="의학교육">의학교육</option>
+        </select>
 
-    <select id="filterStatus">
-      <option value="">전체 상태</option>
-      <option value="신규접수">신규접수</option>
-      <option value="1차 상담 예정">1차 상담 예정</option>
-      <option value="1차 상담 완료">1차 상담 완료</option>
-      <option value="제안서/안내 발송">제안서/안내 발송</option>
-      <option value="계약/결제 완료">계약/결제 완료</option>
-      <option value="교육 신청 완료">교육 신청 완료</option>
-      <option value="보류">보류</option>
-      <option value="종료">종료</option>
-    </select>
+        <select id="filterStatus">
+          <option value="">전체 상태</option>
+          <option value="신규접수">신규접수</option>
+          <option value="1차 상담 예정">1차 상담 예정</option>
+          <option value="1차 상담 완료">1차 상담 완료</option>
+          <option value="회원가입 요청">회원가입 요청</option>
+          <option value="2차 상담 예정">2차 상담 예정</option>
+          <option value="제안서/안내 발송">제안서/안내 발송</option>
+          <option value="계약/결제 완료">계약/결제 완료</option>
+          <option value="교육 신청 완료">교육 신청 완료</option>
+          <option value="보류">보류</option>
+          <option value="종료">종료</option>
+        </select>
 
-    <input id="searchKeyword" placeholder="병원명, 문의자명, 연락처 검색" />
-  </div>
+        <input id="searchKeyword" placeholder="병원명, 문의자명, 연락처 검색" />
+      </div>
 
-  <div id="listResult" class="list-result">
-    상담 리스트를 불러오면 여기에 표시됩니다.
-  </div>
-</section>
+      <div id="listResult" class="list-result">
+        <div class="empty-message">상담 리스트를 불러오면 여기에 표시됩니다.</div>
+      </div>
+
+      <div id="debugBox" class="debug-box"></div>
+    </section>
   </div>
 
   <script>
@@ -842,6 +845,15 @@
     const crmForm = document.getElementById("crmForm");
     const clearBtn = document.getElementById("clearBtn");
 
+    const listResult = document.getElementById("listResult");
+    const debugBox = document.getElementById("debugBox");
+    const loadListBtn = document.getElementById("loadListBtn");
+    const filterType = document.getElementById("filterType");
+    const filterStatus = document.getElementById("filterStatus");
+    const searchKeyword = document.getElementById("searchKeyword");
+
+    let crmListData = [];
+
     const categories = {
       "MSO": ["마케팅", "디자인", "CS교육", "운영"],
       "의학교육": ["위내시경", "FNA", "CNB"]
@@ -886,6 +898,25 @@
     function clearMessage() {
       result.className = "result";
       result.innerHTML = "";
+    }
+
+    function showDebug(message) {
+      debugBox.style.display = "block";
+      debugBox.textContent = message;
+    }
+
+    function hideDebug() {
+      debugBox.style.display = "none";
+      debugBox.textContent = "";
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     typeSelect.addEventListener("change", updateTypeUI);
@@ -948,288 +979,174 @@
       }
     });
 
-    updateTypeUI();
-    
- let crmListData = [];
+    function loadCrmList() {
+      hideDebug();
 
-let crmListData = [];
-
-function loadCrmList() {
-  const listBox = document.getElementById("listResult");
-
-  if (!listBox) {
-    alert("listResult 영역을 찾을 수 없습니다.");
-    return;
-  }
-
-  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
-    listBox.innerHTML =
-      '<div class="empty-message">Apps Script URL이 입력되지 않았습니다.</div>';
-    return;
-  }
-
-  listBox.innerHTML =
-    '<div class="empty-message">상담 리스트를 불러오는 중입니다...</div>';
-
-  const callbackName = "crmListCallback" + Date.now();
-
-  window[callbackName] = function(response) {
-    try {
-      console.log("CRM LIST RESPONSE:", response);
-
-      if (!response) {
-        listBox.innerHTML =
-          '<div class="empty-message">응답 데이터가 없습니다.</div>';
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
+        listResult.innerHTML = '<div class="empty-message">Apps Script URL이 입력되지 않았습니다.</div>';
         return;
       }
 
-      if (response.result !== "success") {
-        listBox.innerHTML =
-          '<div class="empty-message">Apps Script 오류: ' + escapeHtml(response.message || "알 수 없는 오류") + '</div>';
-        return;
-      }
+      listResult.innerHTML = '<div class="empty-message">상담 리스트를 불러오는 중입니다...</div>';
 
-      crmListData = response.data || [];
+      const callbackName = "crmListCallback_" + Date.now();
 
-      if (crmListData.length === 0) {
-        listBox.innerHTML =
-          '<div class="empty-message">구글시트에서 불러올 CRM 상담 데이터가 없습니다.</div>';
-        return;
-      }
+      const timeout = setTimeout(function() {
+        listResult.innerHTML = '<div class="empty-message">리스트 응답이 없습니다.<br>Apps Script URL 또는 배포 상태를 확인해주세요.</div>';
+        showDebug("요청 URL:\n" + buildListUrl(callbackName));
+        delete window[callbackName];
 
-      renderCrmList();
+        const oldScript = document.getElementById(callbackName);
+        if (oldScript) oldScript.remove();
+      }, 12000);
 
-    } catch (error) {
-      listBox.innerHTML =
-        '<div class="empty-message">리스트 표시 중 오류: ' + escapeHtml(error.message) + '</div>';
+      window[callbackName] = function(response) {
+        clearTimeout(timeout);
 
-    } finally {
-      delete window[callbackName];
+        try {
+          showDebug("응답 성공:\n" + JSON.stringify(response, null, 2).slice(0, 3000));
 
-      const scriptTag = document.getElementById(callbackName);
-      if (scriptTag) {
-        scriptTag.remove();
-      }
+          if (!response) {
+            listResult.innerHTML = '<div class="empty-message">응답 데이터가 없습니다.</div>';
+            return;
+          }
+
+          if (response.result !== "success") {
+            listResult.innerHTML = '<div class="empty-message">Apps Script 오류:<br>' + escapeHtml(response.message || "알 수 없는 오류") + '</div>';
+            return;
+          }
+
+          crmListData = response.data || [];
+
+          if (crmListData.length === 0) {
+            listResult.innerHTML = '<div class="empty-message">구글시트에서 불러올 CRM 상담 데이터가 없습니다.<br>상담ID가 CRM-으로 시작하는 데이터가 있는지 확인해주세요.</div>';
+            return;
+          }
+
+          renderCrmList();
+
+        } catch (error) {
+          listResult.innerHTML = '<div class="empty-message">리스트 표시 중 오류:<br>' + escapeHtml(error.message) + '</div>';
+
+        } finally {
+          delete window[callbackName];
+
+          const scriptTag = document.getElementById(callbackName);
+          if (scriptTag) scriptTag.remove();
+        }
+      };
+
+      const script = document.createElement("script");
+      script.id = callbackName;
+      script.src = buildListUrl(callbackName);
+
+      script.onerror = function() {
+        clearTimeout(timeout);
+        listResult.innerHTML = '<div class="empty-message">Apps Script 요청에 실패했습니다.<br>GitHub HTML의 GOOGLE_SCRIPT_URL 값을 확인해주세요.</div>';
+        showDebug("요청 실패 URL:\n" + script.src);
+        delete window[callbackName];
+      };
+
+      document.body.appendChild(script);
     }
-  };
 
-  const script = document.createElement("script");
-  script.id = callbackName;
-  script.src =
-    GOOGLE_SCRIPT_URL +
-    "?action=list" +
-    "&callback=" + encodeURIComponent(callbackName) +
-    "&t=" + Date.now();
+    function buildListUrl(callbackName) {
+      return GOOGLE_SCRIPT_URL
+        + "?action=list"
+        + "&callback=" + encodeURIComponent(callbackName)
+        + "&t=" + Date.now();
+    }
 
-  script.onerror = function() {
-    listBox.innerHTML =
-      '<div class="empty-message">Apps Script 요청에 실패했습니다. GitHub HTML의 GOOGLE_SCRIPT_URL 값을 확인해주세요.</div>';
+    function renderCrmList() {
+      const type = filterType.value;
+      const status = filterStatus.value;
+      const keyword = searchKeyword.value.trim().toLowerCase();
 
-    delete window[callbackName];
-  };
+      let list = crmListData.filter(function(item) {
+        const matchType = !type || item["문의유형"] === type;
+        const matchStatus = !status || item["상태"] === status;
 
-  document.body.appendChild(script);
-}
+        const searchText = [
+          item["상담ID"],
+          item["병원/기관명"],
+          item["문의자명"],
+          item["연락처"],
+          item["세부카테고리"],
+          item["상담내용"],
+          item["니즈 요약"]
+        ].join(" ").toLowerCase();
 
+        const matchKeyword = !keyword || searchText.includes(keyword);
 
-function renderCrmList() {
-  const listBox = document.getElementById("listResult");
+        return matchType && matchStatus && matchKeyword;
+      });
 
-  const typeEl = document.getElementById("filterType");
-  const statusEl = document.getElementById("filterStatus");
-  const keywordEl = document.getElementById("searchKeyword");
+      if (list.length === 0) {
+        listResult.innerHTML = '<div class="empty-message">현재 필터 조건에 맞는 상담 데이터가 없습니다.<br>필터를 전체로 바꿔보세요.</div>';
+        return;
+      }
 
-  const type = typeEl ? typeEl.value : "";
-  const status = statusEl ? statusEl.value : "";
-  const keyword = keywordEl ? keywordEl.value.trim().toLowerCase() : "";
+      const rows = list.map(function(item) {
+        const typeClass = item["문의유형"] === "MSO" ? "badge-mso" : "badge-edu";
 
-  let list = crmListData.filter(function(item) {
-    const matchType = !type || item["문의유형"] === type;
-    const matchStatus = !status || item["상태"] === status;
+        return `
+          <tr>
+            <td>${escapeHtml(item["접수일시"])}</td>
+            <td><span class="badge ${typeClass}">${escapeHtml(item["문의유형"])}</span></td>
+            <td>${escapeHtml(item["세부카테고리"])}</td>
+            <td>${escapeHtml(item["상태"])}</td>
+            <td>${escapeHtml(item["병원/기관명"])}</td>
+            <td>${escapeHtml(item["문의자명"])}</td>
+            <td>${escapeHtml(item["직함/역할"])}</td>
+            <td>${escapeHtml(item["연락처"])}</td>
+            <td>${escapeHtml(item["유입경로"])}</td>
+            <td>${escapeHtml(item["다음 연락일"])}</td>
+            <td>${escapeHtml(item["전환가능성"])}</td>
+            <td>${escapeHtml(item["최종결과"])}</td>
+          </tr>
+        `;
+      }).join("");
 
-    const searchText = [
-      item["상담ID"],
-      item["병원/기관명"],
-      item["문의자명"],
-      item["연락처"],
-      item["세부카테고리"],
-      item["상담내용"],
-      item["니즈 요약"]
-    ].join(" ").toLowerCase();
+      listResult.innerHTML = `
+        <table class="crm-table">
+          <thead>
+            <tr>
+              <th>접수일시</th>
+              <th>문의유형</th>
+              <th>세부</th>
+              <th>상태</th>
+              <th>병원/기관명</th>
+              <th>문의자</th>
+              <th>직함</th>
+              <th>연락처</th>
+              <th>유입경로</th>
+              <th>다음 연락일</th>
+              <th>전환가능성</th>
+              <th>최종결과</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    }
 
-    const matchKeyword = !keyword || searchText.includes(keyword);
+    loadListBtn.addEventListener("click", loadCrmList);
 
-    return matchType && matchStatus && matchKeyword;
-  });
+    filterType.addEventListener("change", function() {
+      if (crmListData.length > 0) renderCrmList();
+    });
 
-  if (list.length === 0) {
-    listBox.innerHTML =
-      '<div class="empty-message">현재 필터 조건에 맞는 상담 데이터가 없습니다. 필터를 전체로 바꿔보세요.</div>';
-    return;
-  }
+    filterStatus.addEventListener("change", function() {
+      if (crmListData.length > 0) renderCrmList();
+    });
 
-  const rows = list.map(function(item) {
-    const typeClass = item["문의유형"] === "MSO" ? "badge-mso" : "badge-edu";
+    searchKeyword.addEventListener("input", function() {
+      if (crmListData.length > 0) renderCrmList();
+    });
 
-    return `
-      <tr>
-        <td>${escapeHtml(item["접수일시"])}</td>
-        <td><span class="badge ${typeClass}">${escapeHtml(item["문의유형"])}</span></td>
-        <td>${escapeHtml(item["세부카테고리"])}</td>
-        <td>${escapeHtml(item["상태"])}</td>
-        <td>${escapeHtml(item["병원/기관명"])}</td>
-        <td>${escapeHtml(item["문의자명"])}</td>
-        <td>${escapeHtml(item["직함/역할"])}</td>
-        <td>${escapeHtml(item["연락처"])}</td>
-        <td>${escapeHtml(item["유입경로"])}</td>
-        <td>${escapeHtml(item["다음 연락일"])}</td>
-        <td>${escapeHtml(item["전환가능성"])}</td>
-        <td>${escapeHtml(item["최종결과"])}</td>
-      </tr>
-    `;
-  }).join("");
-
-  listBox.innerHTML = `
-    <table class="crm-table">
-      <thead>
-        <tr>
-          <th>접수일시</th>
-          <th>문의유형</th>
-          <th>세부</th>
-          <th>상태</th>
-          <th>병원/기관명</th>
-          <th>문의자</th>
-          <th>직함</th>
-          <th>연락처</th>
-          <th>유입경로</th>
-          <th>다음 연락일</th>
-          <th>전환가능성</th>
-          <th>최종결과</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `;
-}
-
-
-function escapeHtml(value) {
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-
-document.getElementById("loadListBtn").addEventListener("click", loadCrmList);
-
-document.getElementById("filterType").addEventListener("change", function() {
-  if (crmListData.length > 0) renderCrmList();
-});
-
-document.getElementById("filterStatus").addEventListener("change", function() {
-  if (crmListData.length > 0) renderCrmList();
-});
-
-document.getElementById("searchKeyword").addEventListener("input", function() {
-  if (crmListData.length > 0) renderCrmList();
-});
-
-
-function renderCrmList() {
-  const type = document.getElementById("filterType").value;
-  const status = document.getElementById("filterStatus").value;
-  const keyword = document.getElementById("searchKeyword").value.trim().toLowerCase();
-
-  let list = crmListData.filter(function(item) {
-    const matchType = !type || item["문의유형"] === type;
-    const matchStatus = !status || item["상태"] === status;
-
-    const searchText = [
-      item["병원/기관명"],
-      item["문의자명"],
-      item["연락처"],
-      item["세부카테고리"],
-      item["상담내용"],
-      item["니즈 요약"]
-    ].join(" ").toLowerCase();
-
-    const matchKeyword = !keyword || searchText.includes(keyword);
-
-    return matchType && matchStatus && matchKeyword;
-  });
-
-  if (list.length === 0) {
-    document.getElementById("listResult").innerHTML =
-      '<div class="empty-message">표시할 상담 데이터가 없습니다.</div>';
-    return;
-  }
-
-  const rows = list.map(function(item) {
-    const typeClass = item["문의유형"] === "MSO" ? "badge-mso" : "badge-edu";
-
-    return `
-      <tr>
-        <td>${escapeHtml(item["접수일시"])}</td>
-        <td><span class="badge ${typeClass}">${escapeHtml(item["문의유형"])}</span></td>
-        <td>${escapeHtml(item["세부카테고리"])}</td>
-        <td>${escapeHtml(item["상태"])}</td>
-        <td>${escapeHtml(item["병원/기관명"])}</td>
-        <td>${escapeHtml(item["문의자명"])}</td>
-        <td>${escapeHtml(item["직함/역할"])}</td>
-        <td>${escapeHtml(item["연락처"])}</td>
-        <td>${escapeHtml(item["유입경로"])}</td>
-        <td>${escapeHtml(item["다음 연락일"])}</td>
-        <td>${escapeHtml(item["전환가능성"])}</td>
-        <td>${escapeHtml(item["최종결과"])}</td>
-      </tr>
-    `;
-  }).join("");
-
-  document.getElementById("listResult").innerHTML = `
-    <table class="crm-table">
-      <thead>
-        <tr>
-          <th>접수일시</th>
-          <th>문의유형</th>
-          <th>세부</th>
-          <th>상태</th>
-          <th>병원/기관명</th>
-          <th>문의자</th>
-          <th>직함</th>
-          <th>연락처</th>
-          <th>유입경로</th>
-          <th>다음 연락일</th>
-          <th>전환가능성</th>
-          <th>최종결과</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `;
-}
-
-
-function escapeHtml(value) {
-  return String(value || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-
-document.getElementById("loadListBtn").addEventListener("click", loadCrmList);
-document.getElementById("filterType").addEventListener("change", renderCrmList);
-document.getElementById("filterStatus").addEventListener("change", renderCrmList);
-document.getElementById("searchKeyword").addEventListener("input", renderCrmList);
+    updateTypeUI();
   </script>
 </body>
 </html>
