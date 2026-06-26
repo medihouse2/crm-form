@@ -1,501 +1,1583 @@
-<script>
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8qAOT3ry-HRZmdpTzWWI5h61896QGClGdvrQ7qVg6Do6nUzIu0H7JpHWr0J08zpbj/exec";
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>메디하우스 CRM 상담관리</title>
 
-  const inquiryType = document.getElementById("inquiryType");
-  const detailCategory = document.getElementById("detailCategory");
-  const msoTabs = document.getElementById("msoTabs");
-  const eduTabs = document.getElementById("eduTabs");
-  const result = document.getElementById("result");
-  const crmForm = document.getElementById("crmForm");
-
-  let crmListData = [];
-
-  const categories = {
-    "MSO": ["마케팅", "디자인", "CS교육", "운영"],
-    "의학교육": ["위내시경", "FNA", "CNB"]
-  };
-
-  const sectionMap = {
-    "마케팅": "marketingSection",
-    "디자인": "designSection",
-    "CS교육": "csSection",
-    "운영": "operationSection",
-    "위내시경": "educationSection",
-    "FNA": "educationSection",
-    "CNB": "educationSection"
-  };
-
-  function updateInquiryType() {
-    const type = inquiryType.value;
-
-    detailCategory.innerHTML = "";
-
-    const first = document.createElement("option");
-    first.value = "";
-    first.textContent = type ? "세부카테고리 선택" : "문의유형을 먼저 선택";
-    detailCategory.appendChild(first);
-
-    (categories[type] || []).forEach(function(item) {
-      const opt = document.createElement("option");
-      opt.value = item;
-      opt.textContent = item;
-      detailCategory.appendChild(opt);
-    });
-
-    msoTabs.classList.toggle("hide", type !== "MSO");
-    eduTabs.classList.toggle("hide", type !== "의학교육");
-
-    clearDetailSections();
-    clearActiveTabs();
-    document.getElementById("detailEmpty").classList.remove("hide");
-  }
-
-  function selectDetailTab(category) {
-    detailCategory.value = category;
-    updateDetailSection();
-  }
-
-  function updateDetailSection() {
-    const category = detailCategory.value;
-
-    clearDetailSections();
-    clearActiveTabs();
-
-    if (!category) {
-      document.getElementById("detailEmpty").classList.remove("hide");
-      return;
+  <style>
+    :root {
+      --main: #174E4F;
+      --main2: #2F6F73;
+      --bg: #F4F7F7;
+      --line: #D9E4E4;
+      --text: #1F2937;
+      --muted: #6B7280;
+      --soft: #F8FAFA;
+      --danger: #B91C1C;
+      --mso: #7A5C2E;
+      --edu: #5A4B81;
     }
 
-    const sectionId = sectionMap[category];
+    * { box-sizing: border-box; }
 
-    if (sectionId) {
-      document.getElementById("detailEmpty").classList.add("hide");
-      document.getElementById(sectionId).classList.remove("hide");
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: linear-gradient(180deg, #EFF6F5 0%, #FFFFFF 42%);
+      color: var(--text);
     }
 
-    document.querySelectorAll(".tab-btn").forEach(function(btn) {
-      if (btn.dataset.category === category) {
-        btn.classList.add("active");
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+
+    .hero {
+      background: var(--main);
+      color: #fff;
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 18px 45px rgba(23,78,79,.18);
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      margin: 0;
+      opacity: .9;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .notice {
+      margin: 18px 0 24px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    form,
+    .crm-list-box {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, .06);
+    }
+
+    .crm-list-box {
+      margin-top: 28px;
+    }
+
+    fieldset {
+      border: 0;
+      padding: 0;
+      margin: 0 0 28px;
+    }
+
+    legend {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    legend::before {
+      content: "";
+      width: 8px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--main2);
+      display: inline-block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      color: #374151;
+    }
+
+    .req::after {
+      content: " *";
+      color: var(--danger);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #CBD5D6;
+      border-radius: 12px;
+      padding: 12px 13px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--main2);
+      box-shadow: 0 0 0 4px rgba(47,111,115,.12);
+    }
+
+    textarea {
+      min-height: 105px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .full { grid-column: 1 / -1; }
+    .hide { display: none !important; }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 20px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--main);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--main);
+      color: #fff;
+      border-color: var(--main);
+    }
+
+    .section-card {
+      border: 1px solid var(--line);
+      background: #FCFEFE;
+      border-radius: 18px;
+      padding: 20px;
+      margin-top: 12px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--main);
+    }
+
+    .mini-title {
+      margin: 20px 0 10px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #111827;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .check-item {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 11px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.35;
+    }
+
+    .check-item input {
+      width: auto;
+      box-shadow: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding-top: 20px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .primary {
+      background: var(--main);
+      color: #fff;
+    }
+
+    .secondary {
+      background: #EEF3F3;
+      color: var(--main);
+    }
+
+    .result {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      display: none;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .result.ok {
+      display: block;
+      background: #ECFDF3;
+      color: #166534;
+      border: 1px solid #BBF7D0;
+    }
+
+    .result.err {
+      display: block;
+      background: #FEF2F2;
+      color: #991B1B;
+      border: 1px solid #FECACA;
+    }
+
+    .hint {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .list-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .list-head h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+
+    .list-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .filter-box {
+      display: grid;
+      grid-template-columns: 170px 190px 190px 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .list-result {
+      overflow-x: auto;
+      font-size: 13px;
+    }
+
+    .crm-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+
+    .crm-table th,
+    .crm-table td {
+      border-bottom: 1px solid #E5E7EB;
+      padding: 10px 8px;
+      text-align: left;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    .crm-table th {
+      background: #F8FAFA;
+      font-weight: 800;
+      color: #374151;
+    }
+
+    .crm-table tr:hover {
+      background: #F9FAFB;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .badge-mso {
+      background: #FFF7E6;
+      color: #7A5C2E;
+    }
+
+    .badge-edu {
+      background: #F1EEFF;
+      color: #5A4B81;
+    }
+
+    .detail-row {
+      background: #FBFDFD;
+    }
+
+    .detail-card {
+      padding: 16px;
+      border: 1px solid #E5E7EB;
+      border-radius: 14px;
+      background: #fff;
+      line-height: 1.6;
+      white-space: normal;
+    }
+
+    .detail-card p {
+      margin: 6px 0;
+    }
+
+    .detail-card strong {
+      color: var(--main);
+    }
+
+    .empty-message {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      background: #F9FAFB;
+      border-radius: 14px;
+      line-height: 1.6;
+    }
+
+    .debug-box {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #6B7280;
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
+      padding: 12px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .grid, .grid3, .check-grid, .filter-box {
+        grid-template-columns: 1fr;
       }
-    });
 
-    if (category === "위내시경" || category === "FNA" || category === "CNB") {
-      const courseSelect = document.querySelector('[name="교육_과정"]');
-      if (courseSelect) courseSelect.value = category;
+      form, .crm-list-box { padding: 20px; }
+      .hero { padding: 24px; }
+      .actions { flex-direction: column-reverse; align-items: stretch; }
+      .list-head { flex-direction: column; align-items: stretch; }
     }
-  }
+  </style>
+</head>
 
-  function clearDetailSections() {
-    [
-      "marketingSection",
-      "designSection",
-      "csSection",
-      "operationSection",
-      "educationSection"
-    ].forEach(function(id) {
-      const el = document.getElementById(id);
-      if (el) el.classList.add("hide");
-    });
-  }
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>메디하우스 CRM 상담관리</h1>
+      <p>1차 기본상담, 2차 심층상담, 3차 제안/후속관리까지 한 번에 기록하는 내부 CRM 입력폼입니다.</p>
+    </section>
 
-  function clearActiveTabs() {
-    document.querySelectorAll(".tab-btn").forEach(function(btn) {
-      btn.classList.remove("active");
-    });
-  }
+    <div class="notice">
+      <strong>운영 기준:</strong> 공통 상담정보는 모든 문의에 동일하게 입력하고, 문의유형과 세부카테고리에 따라 2차 상담 항목이 자동으로 변경됩니다.
+    </div>
 
-  function resetForm() {
-    crmForm.reset();
-    updateInquiryType();
-    result.className = "result";
-    result.innerHTML = "";
-  }
+    <form id="crmForm">
+      <fieldset>
+        <legend>공통 상담 정보</legend>
 
-  function showMessage(type, message) {
-    result.className = "result " + type;
-    result.innerHTML = message;
-  }
+        <div class="grid3">
+          <div>
+            <label class="req">상담단계</label>
+            <select name="상담단계" id="consultStage" required>
+              <option value="1차 기본상담">1차 기본상담</option>
+              <option value="2차 심층상담">2차 심층상담</option>
+              <option value="3차 제안/후속관리">3차 제안/후속관리</option>
+            </select>
+          </div>
 
-  function getFormDataObject(form) {
-    const data = {};
-    const formData = new FormData(form);
+          <div>
+            <label class="req">문의유형</label>
+            <select name="문의유형" id="inquiryType" required onchange="updateInquiryType()">
+              <option value="">선택</option>
+              <option value="MSO">MSO</option>
+              <option value="의학교육">의학교육</option>
+            </select>
+          </div>
 
-    for (const [key, value] of formData.entries()) {
-      if (data[key]) {
-        data[key] += ", " + value;
-      } else {
-        data[key] = value;
-      }
-    }
+          <div>
+            <label class="req">세부카테고리</label>
+            <select name="세부카테고리" id="detailCategory" required onchange="updateDetailSection()">
+              <option value="">문의유형을 먼저 선택</option>
+            </select>
+          </div>
+        </div>
 
-    return data;
-  }
+        <div class="grid3" style="margin-top:16px;">
+          <div>
+            <label>상담상태</label>
+            <select name="상담상태">
+              <option>신규접수</option>
+              <option>1차 상담 완료</option>
+              <option>2차 상담 예정</option>
+              <option>2차 상담 완료</option>
+              <option>제안서 작성중</option>
+              <option>제안서 발송</option>
+              <option>계약/결제 완료</option>
+              <option>보류</option>
+              <option>종료</option>
+            </select>
+          </div>
 
-  function escapeHtml(value) {
-    return String(value || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
+          <div>
+            <label>우선순위</label>
+            <select name="우선순위">
+              <option>중</option>
+              <option>상</option>
+              <option>하</option>
+            </select>
+          </div>
 
-  crmForm.addEventListener("submit", async function(e) {
-    e.preventDefault();
+          <div>
+            <label>담당자</label>
+            <input name="담당자" placeholder="예: 박지원" />
+          </div>
+        </div>
 
-    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
-      showMessage("err", "Apps Script URL이 입력되지 않았습니다.");
-      return;
-    }
+        <div class="grid3" style="margin-top:16px;">
+          <div>
+            <label class="req">병원/기관명</label>
+            <input name="병원/기관명" required placeholder="예: 세종국민건강의원" />
+          </div>
 
-    const payload = getFormDataObject(crmForm);
+          <div>
+            <label>대표자/원장명</label>
+            <input name="대표자/원장명" placeholder="예: 대표자" />
+          </div>
 
-    payload["상담ID"] = "CRM-" + Date.now();
-    payload["접수일시"] = new Date().toLocaleString("sv-SE", {
-      timeZone: "Asia/Seoul"
-    }).replace("T", " ");
+          <div>
+            <label>지역</label>
+            <input name="지역" placeholder="예: 세종시" />
+          </div>
 
-    try {
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-        },
-        body: new URLSearchParams({
-          payload: JSON.stringify(payload)
-        })
+          <div>
+            <label class="req">문의자명</label>
+            <input name="문의자명" required />
+          </div>
+
+          <div>
+            <label>직함/역할</label>
+            <select name="직함/역할">
+              <option value="">선택</option>
+              <option>의사</option>
+              <option>병원장</option>
+              <option>대표원장</option>
+              <option>직원</option>
+              <option>코디네이터</option>
+              <option>원무</option>
+              <option>간호사</option>
+              <option>방사선사</option>
+              <option>마케팅 담당자</option>
+              <option>기타</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="req">연락처</label>
+            <input name="연락처" required placeholder="010-0000-0000" />
+          </div>
+
+          <div>
+            <label>이메일</label>
+            <input name="이메일" type="email" placeholder="name@example.com" />
+          </div>
+
+          <div>
+            <label>유입경로</label>
+            <select name="유입경로">
+              <option value="">선택</option>
+              <option>홈페이지</option>
+              <option>랜딩페이지</option>
+              <option>네이버 검색</option>
+              <option>네이버 광고</option>
+              <option>구글 광고</option>
+              <option>인스타그램</option>
+              <option>블로그</option>
+              <option>유튜브</option>
+              <option>기존 회원</option>
+              <option>지인 소개</option>
+              <option>문자/알림톡</option>
+              <option>기타</option>
+            </select>
+          </div>
+
+          <div>
+            <label>선호 연락시간</label>
+            <input name="선호 연락시간" placeholder="예: 평일 17시 이후" />
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:16px;">
+          <div>
+            <label>1차 상담 요약</label>
+            <textarea name="1차 상담 요약" placeholder="최초 문의 내용, 현재 고민, 서비스 관심도, 다음 상담 필요 여부를 간단히 기록"></textarea>
+          </div>
+
+          <div>
+            <label>상담 메모</label>
+            <textarea name="상담 메모" placeholder="통화 부재, 콜백 예정, 의사결정권자 확인, 특이사항 등"></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>세부 상담 탭</legend>
+
+        <div id="msoTabs" class="tabs hide">
+          <button type="button" class="tab-btn" data-category="마케팅" onclick="selectDetailTab('마케팅')">마케팅</button>
+          <button type="button" class="tab-btn" data-category="디자인" onclick="selectDetailTab('디자인')">디자인</button>
+          <button type="button" class="tab-btn" data-category="CS교육" onclick="selectDetailTab('CS교육')">CS교육</button>
+          <button type="button" class="tab-btn" data-category="운영" onclick="selectDetailTab('운영')">운영</button>
+        </div>
+
+        <div id="eduTabs" class="tabs hide">
+          <button type="button" class="tab-btn" data-category="위내시경" onclick="selectDetailTab('위내시경')">위내시경</button>
+          <button type="button" class="tab-btn" data-category="FNA" onclick="selectDetailTab('FNA')">FNA</button>
+          <button type="button" class="tab-btn" data-category="CNB" onclick="selectDetailTab('CNB')">CNB</button>
+        </div>
+
+        <div id="detailEmpty" class="section-card">
+          <p class="section-title">문의유형과 세부카테고리를 선택하면 상담 항목이 표시됩니다.</p>
+        </div>
+
+        <div id="marketingSection" class="section-card hide">
+          <p class="section-title">마케팅 심층상담</p>
+
+          <div class="mini-title">2차 상담 핵심 확인</div>
+          <div class="check-grid">
+            <label class="check-item"><input type="checkbox" name="마케팅_주요고민" value="신규 환자 감소"> 신규 환자 감소</label>
+            <label class="check-item"><input type="checkbox" name="마케팅_주요고민" value="매출 감소"> 매출 감소</label>
+            <label class="check-item"><input type="checkbox" name="마케팅_주요고민" value="마케팅 성과 부진"> 마케팅 성과 부진</label>
+            <label class="check-item"><input type="checkbox" name="마케팅_주요고민" value="온라인 노출 부족"> 온라인 노출 부족</label>
+            <label class="check-item"><input type="checkbox" name="마케팅_주요고민" value="블로그 관리 미흡"> 블로그 관리 미흡</label>
+            <label class="check-item"><input type="checkbox" name="마케팅_주요고민" value="플레이스 관리 미흡"> 플레이스 관리 미흡</label>
+            <label class="check-item"><input type="checkbox" name="마케팅_주요고민" value="광고 효율 저하"> 광고 효율 저하</label>
+            <label class="check-item"><input type="checkbox" name="마케팅_주요고민" value="기타"> 기타</label>
+          </div>
+
+          <div class="grid3" style="margin-top:16px;">
+            <div>
+              <label>매출 감소 체감 시점</label>
+              <select name="마케팅_매출감소시점">
+                <option value="">선택</option>
+                <option>3개월 이내</option>
+                <option>6개월 이내</option>
+                <option>1년 이내</option>
+                <option>기타</option>
+              </select>
+            </div>
+
+            <div>
+              <label>전년 대비 감소율</label>
+              <select name="마케팅_전년대비감소율">
+                <option value="">선택</option>
+                <option>10% 이하</option>
+                <option>10~20%</option>
+                <option>20~30%</option>
+                <option>30% 이상</option>
+                <option>확인필요</option>
+              </select>
+            </div>
+
+            <div>
+              <label>월 신규 환자 수</label>
+              <input name="마케팅_월신규환자수" placeholder="예: 50명" />
+            </div>
+          </div>
+
+          <div class="grid3" style="margin-top:16px;">
+            <div>
+              <label>주요 유입 경로</label>
+              <select name="마케팅_주요유입경로">
+                <option value="">선택</option>
+                <option>네이버 검색</option>
+                <option>네이버 플레이스</option>
+                <option>블로그</option>
+                <option>홈페이지</option>
+                <option>지인 소개</option>
+                <option>기존 고객 소개</option>
+                <option>기타</option>
+              </select>
+            </div>
+
+            <div>
+              <label>최근 유입 변화</label>
+              <select name="마케팅_최근유입변화">
+                <option value="">선택</option>
+                <option>증가</option>
+                <option>유지</option>
+                <option>감소</option>
+                <option>확인필요</option>
+              </select>
+            </div>
+
+            <div>
+              <label>월 마케팅 예산</label>
+              <input name="마케팅_월예산" placeholder="예: 300만원" />
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:16px;">
+            <div>
+              <label>주요 진료/수익 항목</label>
+              <textarea name="마케팅_주요진료수익항목" placeholder="예: 피부성형, 보톡스/필러, 리프팅, 검진 등 매출 비중 높은 항목"></textarea>
+            </div>
+
+            <div>
+              <label>경쟁 병원 현황</label>
+              <textarea name="마케팅_경쟁병원현황" placeholder="경쟁 병원 증가 여부, 주요 경쟁 병원, 우리 병원의 강점/약점"></textarea>
+            </div>
+
+            <div>
+              <label>현재 마케팅 운영 현황</label>
+              <textarea name="마케팅_현재운영현황" placeholder="블로그, 홈페이지, 검색광고, 플레이스, 디자인, 보고서 수령 여부, 만족도"></textarea>
+            </div>
+
+            <div>
+              <label>온라인 진단 메모</label>
+              <textarea name="마케팅_온라인진단메모" placeholder="예: 블로그 연결 안 됨, 2020년 이전 블로그 노출, 동일 사진 반복, 간판 노후화 등"></textarea>
+            </div>
+
+            <div class="full">
+              <label>향후 개선 희망사항</label>
+              <textarea name="마케팅_개선희망사항" placeholder="신규환자 증가, 매출 향상, 검색광고, 블로그 운영, 플레이스 관리, 운영 컨설팅 등"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div id="designSection" class="section-card hide">
+          <p class="section-title">디자인/브랜딩 상담</p>
+
+          <div class="grid3">
+            <div>
+              <label>필요 디자인 범위</label>
+              <select name="디자인_필요범위">
+                <option value="">선택</option>
+                <option>홈페이지</option>
+                <option>랜딩페이지</option>
+                <option>병원 브랜딩</option>
+                <option>간판/외부 사인</option>
+                <option>홍보물</option>
+                <option>SNS/카드뉴스</option>
+                <option>전체 개선</option>
+              </select>
+            </div>
+
+            <div>
+              <label>현재 홈페이지 상태</label>
+              <select name="디자인_홈페이지상태">
+                <option value="">선택</option>
+                <option>없음</option>
+                <option>있으나 노후화</option>
+                <option>모바일 불편</option>
+                <option>예약/문의 동선 부족</option>
+                <option>개선필요 낮음</option>
+              </select>
+            </div>
+
+            <div>
+              <label>브랜드 톤</label>
+              <select name="디자인_브랜드톤">
+                <option value="">선택</option>
+                <option>신뢰감</option>
+                <option>고급형</option>
+                <option>친근함</option>
+                <option>전문성</option>
+                <option>깔끔함</option>
+                <option>미정</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:16px;">
+            <div>
+              <label>현재 디자인 문제</label>
+              <textarea name="디자인_현재문제" placeholder="노후 간판, 관리되지 않는 홈페이지, 콘텐츠 이미지 반복, 브랜드 통일성 부족 등"></textarea>
+            </div>
+
+            <div>
+              <label>필요 제작물</label>
+              <textarea name="디자인_필요제작물" placeholder="홈페이지 섹션, 랜딩페이지, 배너, 썸네일, 리플렛, 포스터, 병원 내부 사인물 등"></textarea>
+            </div>
+
+            <div class="full">
+              <label>레퍼런스/선호 스타일</label>
+              <textarea name="디자인_레퍼런스" placeholder="참고 병원, 원하는 색감, 피하고 싶은 디자인, 기존 자료 URL 등"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div id="csSection" class="section-card hide">
+          <p class="section-title">CS교육 상담</p>
+
+          <div class="grid3">
+            <div>
+              <label>직원 수</label>
+              <input name="CS_직원수" placeholder="예: 10명" />
+            </div>
+
+            <div>
+              <label>직원 교육 정기 진행</label>
+              <select name="CS_정기교육여부">
+                <option value="">선택</option>
+                <option>예</option>
+                <option>아니오</option>
+                <option>확인필요</option>
+              </select>
+            </div>
+
+            <div>
+              <label>업무 매뉴얼 구축</label>
+              <select name="CS_매뉴얼구축">
+                <option value="">선택</option>
+                <option>예</option>
+                <option>아니오</option>
+                <option>일부만 있음</option>
+                <option>확인필요</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mini-title">주요 CS 이슈</div>
+          <div class="check-grid">
+            <label class="check-item"><input type="checkbox" name="CS_주요이슈" value="전화응대"> 전화응대</label>
+            <label class="check-item"><input type="checkbox" name="CS_주요이슈" value="접수/수납"> 접수/수납</label>
+            <label class="check-item"><input type="checkbox" name="CS_주요이슈" value="대기안내"> 대기안내</label>
+            <label class="check-item"><input type="checkbox" name="CS_주요이슈" value="불만응대"> 불만응대</label>
+            <label class="check-item"><input type="checkbox" name="CS_주요이슈" value="검사안내"> 검사안내</label>
+            <label class="check-item"><input type="checkbox" name="CS_주요이슈" value="상담전환"> 상담전환</label>
+            <label class="check-item"><input type="checkbox" name="CS_주요이슈" value="직원태도"> 직원태도</label>
+            <label class="check-item"><input type="checkbox" name="CS_주요이슈" value="기타"> 기타</label>
+          </div>
+
+          <div class="grid" style="margin-top:16px;">
+            <div>
+              <label>현재 CS 문제 상세</label>
+              <textarea name="CS_문제상세" placeholder="환자 불만, 리뷰 이슈, 전화응대 문제, 직원별 편차 등"></textarea>
+            </div>
+
+            <div>
+              <label>교육 희망 방향</label>
+              <textarea name="CS_교육희망방향" placeholder="기초 응대, 스크립트, 롤플레잉, 부서별 매뉴얼, 관리자 교육 등"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div id="operationSection" class="section-card hide">
+          <p class="section-title">운영 컨설팅 상담</p>
+
+          <div class="grid3">
+            <div>
+              <label>의사 수</label>
+              <input name="운영_의사수" placeholder="예: 2명" />
+            </div>
+
+            <div>
+              <label>직원 수</label>
+              <input name="운영_직원수" placeholder="예: 12명" />
+            </div>
+
+            <div>
+              <label>월 평균 내원 환자 수</label>
+              <input name="운영_월평균내원수" placeholder="예: 1,000명" />
+            </div>
+
+            <div>
+              <label>원장 직접 처리 업무량</label>
+              <select name="운영_원장업무량">
+                <option value="">선택</option>
+                <option>매우 많음</option>
+                <option>많음</option>
+                <option>보통</option>
+                <option>적음</option>
+              </select>
+            </div>
+
+            <div>
+              <label>업무 매뉴얼 구축</label>
+              <select name="운영_매뉴얼구축">
+                <option value="">선택</option>
+                <option>예</option>
+                <option>아니오</option>
+                <option>일부만 있음</option>
+              </select>
+            </div>
+
+            <div>
+              <label>운영 개선 우선순위</label>
+              <select name="운영_우선순위">
+                <option value="">선택</option>
+                <option>직원관리</option>
+                <option>예약/접수 동선</option>
+                <option>검사/진료 프로세스</option>
+                <option>매뉴얼 구축</option>
+                <option>CS 체계</option>
+                <option>성과관리</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:16px;">
+            <div>
+              <label>현재 운영 문제</label>
+              <textarea name="운영_현재문제" placeholder="직원관리, 업무 누락, 원장 업무 과부하, 예약 동선, 부서 간 커뮤니케이션 문제 등"></textarea>
+            </div>
+
+            <div>
+              <label>희망 개선 방향</label>
+              <textarea name="운영_개선방향" placeholder="부서 매뉴얼, 업무분장, 상담 프로세스, KPI, 보고체계 등"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div id="educationSection" class="section-card hide">
+          <p class="section-title">의학교육 상담</p>
+
+          <div class="grid3">
+            <div>
+              <label>교육 과정</label>
+              <select name="교육_과정">
+                <option value="">선택</option>
+                <option>위내시경</option>
+                <option>FNA</option>
+                <option>CNB</option>
+              </select>
+            </div>
+
+            <div>
+              <label>의사면허 유무</label>
+              <select name="교육_의사면허유무">
+                <option value="">선택</option>
+                <option>의사면허 보유</option>
+                <option>면허 확인 필요</option>
+                <option>비대상</option>
+              </select>
+            </div>
+
+            <div>
+              <label>면허번호</label>
+              <input name="교육_면허번호" placeholder="내부 확인용" />
+            </div>
+
+            <div>
+              <label>전공/진료과</label>
+              <select name="교육_전공진료과">
+                <option value="">선택</option>
+                <option>내과</option>
+                <option>외과</option>
+                <option>영상의학과</option>
+                <option>가정의학과</option>
+                <option>산부인과</option>
+                <option>일반의</option>
+                <option>전공의</option>
+                <option>기타</option>
+              </select>
+            </div>
+
+            <div>
+              <label>경력</label>
+              <select name="교육_경력">
+                <option value="">선택</option>
+                <option>1년 미만</option>
+                <option>1~3년</option>
+                <option>3~5년</option>
+                <option>5~10년</option>
+                <option>10년 이상</option>
+              </select>
+            </div>
+
+            <div>
+              <label>술기 경험</label>
+              <select name="교육_술기경험">
+                <option value="">선택</option>
+                <option>없음</option>
+                <option>참관 경험</option>
+                <option>기초 가능</option>
+                <option>실무 중</option>
+                <option>심화 희망</option>
+              </select>
+            </div>
+
+            <div>
+              <label>희망 일정</label>
+              <input name="교육_희망일정" placeholder="예: 7월 주말 / 가장 빠른 일정" />
+            </div>
+
+            <div>
+              <label>교육 대상 적합성</label>
+              <select name="교육_대상적합성">
+                <option value="">선택</option>
+                <option>대상자 적합</option>
+                <option>추가 확인 필요</option>
+                <option>비대상</option>
+              </select>
+            </div>
+
+            <div>
+              <label>결제/신청 상태</label>
+              <select name="교육_신청상태">
+                <option value="">선택</option>
+                <option>문의</option>
+                <option>일정 안내</option>
+                <option>신청서 발송</option>
+                <option>결제 대기</option>
+                <option>결제 완료</option>
+                <option>보류</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid" style="margin-top:16px;">
+            <div>
+              <label>교육 목적</label>
+              <textarea name="교육_교육목적" placeholder="개원 전 술기 습득, 진료 확장, 검진센터 역량 강화 등"></textarea>
+            </div>
+
+            <div>
+              <label>추가 확인사항</label>
+              <textarea name="교육_추가확인사항" placeholder="면허 확인, 전공 확인, 술기 수준, 희망 일정, 준비물 안내 등"></textarea>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>3차 제안 및 후속관리</legend>
+
+        <div class="grid3">
+          <div>
+            <label>제안 방향</label>
+            <select name="제안방향">
+              <option value="">선택</option>
+              <option>마케팅 운영 제안</option>
+              <option>디자인 개선 제안</option>
+              <option>CS교육 제안</option>
+              <option>운영 컨설팅 제안</option>
+              <option>교육 일정 안내</option>
+              <option>추가 진단 후 제안</option>
+            </select>
+          </div>
+
+          <div>
+            <label>예상 예산/매출</label>
+            <input name="예상예산매출" placeholder="예: 월 300만원 / 교육 160만원" />
+          </div>
+
+          <div>
+            <label>전환가능성</label>
+            <select name="전환가능성">
+              <option value="">선택</option>
+              <option>상</option>
+              <option>중</option>
+              <option>하</option>
+              <option>확인필요</option>
+            </select>
+          </div>
+
+          <div>
+            <label>다음 액션</label>
+            <input name="다음액션" placeholder="예: 온라인 진단 리포트 발송" />
+          </div>
+
+          <div>
+            <label>다음 연락일</label>
+            <input name="다음연락일" type="date" />
+          </div>
+
+          <div>
+            <label>최종결과</label>
+            <select name="최종결과">
+              <option>진행중</option>
+              <option>전환완료</option>
+              <option>미전환</option>
+              <option>재문의 예정</option>
+              <option>부적합</option>
+              <option>중복</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:16px;">
+          <div>
+            <label>실장 체크리스트 핵심 확보 5가지</label>
+            <textarea name="핵심체크리스트" placeholder="① 매출 감소율 ② 월 신규 환자 수 ③ 주력 진료/시술 ④ 현 마케팅 업체 범위 ⑤ 월 예산 증액 가능 여부"></textarea>
+          </div>
+
+          <div>
+            <label>상담 후 검토 및 후속 안내사항</label>
+            <textarea name="후속안내사항" placeholder="온라인 노출 현황, 경쟁병원, 블로그/플레이스 운영 상태, 검색광고 방향 등 후속 검토 항목"></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="button" class="secondary" onclick="resetForm()">초기화</button>
+        <button type="submit" class="primary">CRM 상담 저장</button>
+      </div>
+
+      <div id="result" class="result"></div>
+    </form>
+
+    <section class="crm-list-box">
+      <div class="list-head">
+        <div>
+          <h2>상담 신청서 불러오기</h2>
+          <p>구글시트에 저장된 상담 신청 내역을 확인합니다.</p>
+        </div>
+        <button type="button" class="primary" onclick="loadCrmList()">상담 신청서 불러오기</button>
+      </div>
+
+      <div class="filter-box">
+        <select id="listFilterType">
+          <option value="">전체 문의유형</option>
+          <option value="MSO">MSO</option>
+          <option value="의학교육">의학교육</option>
+        </select>
+
+        <select id="listFilterCategory">
+          <option value="">전체 세부카테고리</option>
+          <option value="마케팅">마케팅</option>
+          <option value="디자인">디자인</option>
+          <option value="CS교육">CS교육</option>
+          <option value="운영">운영</option>
+          <option value="위내시경">위내시경</option>
+          <option value="FNA">FNA</option>
+          <option value="CNB">CNB</option>
+        </select>
+
+        <select id="listFilterStatus">
+          <option value="">전체 상담상태</option>
+          <option value="신규접수">신규접수</option>
+          <option value="1차 상담 완료">1차 상담 완료</option>
+          <option value="2차 상담 예정">2차 상담 예정</option>
+          <option value="2차 상담 완료">2차 상담 완료</option>
+          <option value="제안서 작성중">제안서 작성중</option>
+          <option value="제안서 발송">제안서 발송</option>
+          <option value="계약/결제 완료">계약/결제 완료</option>
+          <option value="보류">보류</option>
+          <option value="종료">종료</option>
+        </select>
+
+        <input id="listSearchKeyword" placeholder="병원명, 문의자명, 연락처, 담당자 검색" />
+      </div>
+
+      <div id="listResult" class="list-result">
+        <div class="empty-message">상담 신청서를 불러오면 여기에 표시됩니다.</div>
+      </div>
+
+      <div id="listDebugBox" class="debug-box"></div>
+    </section>
+  </div>
+
+  <script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwp7CG_2kRv_vt-ixOvekYMWnxlnRo3D2C-0-dXXboabWqNJ8goqRZbht4nAxyZbc0Q/exec";
+
+    const inquiryType = document.getElementById("inquiryType");
+    const detailCategory = document.getElementById("detailCategory");
+    const msoTabs = document.getElementById("msoTabs");
+    const eduTabs = document.getElementById("eduTabs");
+    const result = document.getElementById("result");
+    const crmForm = document.getElementById("crmForm");
+
+    let crmListData = [];
+
+    const categories = {
+      "MSO": ["마케팅", "디자인", "CS교육", "운영"],
+      "의학교육": ["위내시경", "FNA", "CNB"]
+    };
+
+    const sectionMap = {
+      "마케팅": "marketingSection",
+      "디자인": "designSection",
+      "CS교육": "csSection",
+      "운영": "operationSection",
+      "위내시경": "educationSection",
+      "FNA": "educationSection",
+      "CNB": "educationSection"
+    };
+
+    function updateInquiryType() {
+      const type = inquiryType.value;
+
+      detailCategory.innerHTML = "";
+
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = type ? "세부카테고리 선택" : "문의유형을 먼저 선택";
+      detailCategory.appendChild(first);
+
+      (categories[type] || []).forEach(function(item) {
+        const opt = document.createElement("option");
+        opt.value = item;
+        opt.textContent = item;
+        detailCategory.appendChild(opt);
       });
 
-      showMessage("ok", "저장 요청이 전송되었습니다. 구글시트에서 접수 내역을 확인해주세요.");
+      msoTabs.classList.toggle("hide", type !== "MSO");
+      eduTabs.classList.toggle("hide", type !== "의학교육");
 
-    } catch (error) {
-      showMessage("err", "저장 중 오류가 발생했습니다: " + error.message);
-    }
-  });
-
-  function loadCrmList() {
-    const listResult = document.getElementById("listResult");
-    const debugBox = document.getElementById("listDebugBox");
-
-    if (!listResult) {
-      alert("상담 신청서 리스트 영역이 없습니다.");
-      return;
+      clearDetailSections();
+      clearActiveTabs();
+      document.getElementById("detailEmpty").classList.remove("hide");
     }
 
-    if (debugBox) {
-      debugBox.style.display = "none";
-      debugBox.textContent = "";
+    function selectDetailTab(category) {
+      detailCategory.value = category;
+      updateDetailSection();
     }
 
-    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
-      listResult.innerHTML = '<div class="empty-message">Apps Script URL이 입력되지 않았습니다.</div>';
-      return;
-    }
+    function updateDetailSection() {
+      const category = detailCategory.value;
 
-    listResult.innerHTML = '<div class="empty-message">상담 신청서를 불러오는 중입니다...</div>';
+      clearDetailSections();
+      clearActiveTabs();
 
-    const callbackName = "crmListCallback_" + Date.now();
-
-    const timeout = setTimeout(function() {
-      listResult.innerHTML = '<div class="empty-message">리스트 응답이 없습니다.<br>Apps Script 배포 상태 또는 URL을 확인해주세요.</div>';
-
-      if (debugBox) {
-        debugBox.style.display = "block";
-        debugBox.textContent = "요청 URL:\n" + buildCrmListUrl(callbackName);
+      if (!category) {
+        document.getElementById("detailEmpty").classList.remove("hide");
+        return;
       }
 
-      delete window[callbackName];
+      const sectionId = sectionMap[category];
 
-      const oldScript = document.getElementById(callbackName);
-      if (oldScript) oldScript.remove();
-    }, 12000);
+      if (sectionId) {
+        document.getElementById("detailEmpty").classList.add("hide");
+        document.getElementById(sectionId).classList.remove("hide");
+      }
 
-    window[callbackName] = function(response) {
-      clearTimeout(timeout);
+      document.querySelectorAll(".tab-btn").forEach(function(btn) {
+        if (btn.dataset.category === category) {
+          btn.classList.add("active");
+        }
+      });
+
+      if (category === "위내시경" || category === "FNA" || category === "CNB") {
+        const courseSelect = document.querySelector('[name="교육_과정"]');
+        if (courseSelect) courseSelect.value = category;
+      }
+    }
+
+    function clearDetailSections() {
+      [
+        "marketingSection",
+        "designSection",
+        "csSection",
+        "operationSection",
+        "educationSection"
+      ].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add("hide");
+      });
+    }
+
+    function clearActiveTabs() {
+      document.querySelectorAll(".tab-btn").forEach(function(btn) {
+        btn.classList.remove("active");
+      });
+    }
+
+    function resetForm() {
+      crmForm.reset();
+      updateInquiryType();
+      result.className = "result";
+      result.innerHTML = "";
+    }
+
+    function showMessage(type, message) {
+      result.className = "result " + type;
+      result.innerHTML = message;
+    }
+
+    function getFormDataObject(form) {
+      const data = {};
+      const formData = new FormData(form);
+
+      for (const [key, value] of formData.entries()) {
+        if (data[key]) {
+          data[key] += ", " + value;
+        } else {
+          data[key] = value;
+        }
+      }
+
+      return data;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    crmForm.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_")) {
+        showMessage("err", "Apps Script URL이 입력되지 않았습니다.");
+        return;
+      }
+
+      const payload = getFormDataObject(crmForm);
+
+      payload["상담ID"] = "CRM-" + Date.now();
+      payload["접수일시"] = new Date().toLocaleString("sv-SE", {
+        timeZone: "Asia/Seoul"
+      }).replace("T", " ");
 
       try {
-        if (debugBox) {
-          debugBox.style.display = "block";
-          debugBox.textContent = "응답 성공:\n" + JSON.stringify(response, null, 2).slice(0, 2500);
-        }
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+          },
+          body: new URLSearchParams({
+            payload: JSON.stringify(payload)
+          })
+        });
 
-        if (!response) {
-          listResult.innerHTML = '<div class="empty-message">응답 데이터가 없습니다.</div>';
-          return;
-        }
-
-        if (response.result !== "success") {
-          listResult.innerHTML =
-            '<div class="empty-message">Apps Script 오류:<br>' +
-            escapeHtml(response.message || "알 수 없는 오류") +
-            '</div>';
-          return;
-        }
-
-        crmListData = response.data || [];
-
-        if (crmListData.length === 0) {
-          listResult.innerHTML =
-            '<div class="empty-message">불러올 상담 신청서가 없습니다.<br>구글시트에 CRM-으로 시작하는 상담ID가 있는지 확인해주세요.</div>';
-          return;
-        }
-
-        renderCrmList();
+        showMessage("ok", "저장 요청이 전송되었습니다. 구글시트에서 접수 내역을 확인해주세요.");
 
       } catch (error) {
-        listResult.innerHTML =
-          '<div class="empty-message">리스트 표시 중 오류:<br>' +
-          escapeHtml(error.message) +
-          '</div>';
-
-      } finally {
-        delete window[callbackName];
-
-        const scriptTag = document.getElementById(callbackName);
-        if (scriptTag) scriptTag.remove();
+        showMessage("err", "저장 중 오류가 발생했습니다: " + error.message);
       }
-    };
-
-    const script = document.createElement("script");
-    script.id = callbackName;
-    script.src = buildCrmListUrl(callbackName);
-
-    script.onerror = function() {
-      clearTimeout(timeout);
-
-      listResult.innerHTML =
-        '<div class="empty-message">Apps Script 요청에 실패했습니다.<br>GitHub HTML의 GOOGLE_SCRIPT_URL 값을 확인해주세요.</div>';
-
-      if (debugBox) {
-        debugBox.style.display = "block";
-        debugBox.textContent = "요청 실패 URL:\n" + script.src;
-      }
-
-      delete window[callbackName];
-    };
-
-    document.body.appendChild(script);
-  }
-
-  function buildCrmListUrl(callbackName) {
-    return GOOGLE_SCRIPT_URL
-      + "?action=list"
-      + "&callback=" + encodeURIComponent(callbackName)
-      + "&t=" + Date.now();
-  }
-
-  function renderCrmList() {
-    const listResult = document.getElementById("listResult");
-
-    const typeEl = document.getElementById("listFilterType");
-    const categoryEl = document.getElementById("listFilterCategory");
-    const statusEl = document.getElementById("listFilterStatus");
-    const keywordEl = document.getElementById("listSearchKeyword");
-
-    const type = typeEl ? typeEl.value : "";
-    const category = categoryEl ? categoryEl.value : "";
-    const status = statusEl ? statusEl.value : "";
-    const keyword = keywordEl ? keywordEl.value.trim().toLowerCase() : "";
-
-    let list = crmListData.filter(function(item) {
-      const matchType = !type || item["문의유형"] === type;
-      const matchCategory = !category || item["세부카테고리"] === category;
-      const matchStatus = !status || item["상담상태"] === status;
-
-      const searchText = [
-        item["상담ID"],
-        item["병원/기관명"],
-        item["대표자/원장명"],
-        item["문의자명"],
-        item["연락처"],
-        item["담당자"],
-        item["지역"],
-        item["1차 상담 요약"],
-        item["상담 메모"]
-      ].join(" ").toLowerCase();
-
-      const matchKeyword = !keyword || searchText.includes(keyword);
-
-      return matchType && matchCategory && matchStatus && matchKeyword;
     });
 
-    if (list.length === 0) {
-      listResult.innerHTML =
-        '<div class="empty-message">현재 필터 조건에 맞는 상담 신청서가 없습니다.<br>필터를 전체로 바꿔보세요.</div>';
-      return;
+    function loadCrmList() {
+      const listResult = document.getElementById("listResult");
+      const debugBox = document.getElementById("listDebugBox");
+
+      debugBox.style.display = "none";
+      debugBox.textContent = "";
+
+      listResult.innerHTML = '<div class="empty-message">상담 신청서를 불러오는 중입니다...</div>';
+
+      const callbackName = "crmListCallback_" + Date.now();
+
+      const timeout = setTimeout(function() {
+        listResult.innerHTML = '<div class="empty-message">리스트 응답이 없습니다.<br>Apps Script 배포 상태 또는 URL을 확인해주세요.</div>';
+        debugBox.style.display = "block";
+        debugBox.textContent = "요청 URL:\n" + buildCrmListUrl(callbackName);
+        delete window[callbackName];
+
+        const oldScript = document.getElementById(callbackName);
+        if (oldScript) oldScript.remove();
+      }, 12000);
+
+      window[callbackName] = function(response) {
+        clearTimeout(timeout);
+
+        try {
+          debugBox.style.display = "block";
+          debugBox.textContent = "응답 성공:\n" + JSON.stringify(response, null, 2).slice(0, 2500);
+
+          if (!response) {
+            listResult.innerHTML = '<div class="empty-message">응답 데이터가 없습니다.</div>';
+            return;
+          }
+
+          if (response.result !== "success") {
+            listResult.innerHTML =
+              '<div class="empty-message">Apps Script 오류:<br>' +
+              escapeHtml(response.message || "알 수 없는 오류") +
+              '</div>';
+            return;
+          }
+
+          crmListData = response.data || [];
+
+          if (crmListData.length === 0) {
+            listResult.innerHTML =
+              '<div class="empty-message">불러올 상담 신청서가 없습니다.<br>구글시트에 CRM-으로 시작하는 상담ID가 있는지 확인해주세요.</div>';
+            return;
+          }
+
+          renderCrmList();
+
+        } catch (error) {
+          listResult.innerHTML =
+            '<div class="empty-message">리스트 표시 중 오류:<br>' +
+            escapeHtml(error.message) +
+            '</div>';
+
+        } finally {
+          delete window[callbackName];
+
+          const scriptTag = document.getElementById(callbackName);
+          if (scriptTag) scriptTag.remove();
+        }
+      };
+
+      const script = document.createElement("script");
+      script.id = callbackName;
+      script.src = buildCrmListUrl(callbackName);
+
+      script.onerror = function() {
+        clearTimeout(timeout);
+        listResult.innerHTML =
+          '<div class="empty-message">Apps Script 요청에 실패했습니다.<br>GitHub HTML의 GOOGLE_SCRIPT_URL 값을 확인해주세요.</div>';
+        debugBox.style.display = "block";
+        debugBox.textContent = "요청 실패 URL:\n" + script.src;
+        delete window[callbackName];
+      };
+
+      document.body.appendChild(script);
     }
 
-    const rows = list.map(function(item, index) {
-      const typeClass = item["문의유형"] === "MSO" ? "badge-mso" : "badge-edu";
+    function buildCrmListUrl(callbackName) {
+      return GOOGLE_SCRIPT_URL
+        + "?action=list"
+        + "&callback=" + encodeURIComponent(callbackName)
+        + "&t=" + Date.now();
+    }
+
+    function renderCrmList() {
+      const listResult = document.getElementById("listResult");
+
+      const type = document.getElementById("listFilterType").value;
+      const category = document.getElementById("listFilterCategory").value;
+      const status = document.getElementById("listFilterStatus").value;
+      const keyword = document.getElementById("listSearchKeyword").value.trim().toLowerCase();
+
+      let list = crmListData.filter(function(item) {
+        const matchType = !type || item["문의유형"] === type;
+        const matchCategory = !category || item["세부카테고리"] === category;
+        const matchStatus = !status || item["상담상태"] === status;
+
+        const searchText = [
+          item["상담ID"],
+          item["병원/기관명"],
+          item["대표자/원장명"],
+          item["문의자명"],
+          item["연락처"],
+          item["담당자"],
+          item["지역"],
+          item["1차 상담 요약"],
+          item["상담 메모"]
+        ].join(" ").toLowerCase();
+
+        const matchKeyword = !keyword || searchText.includes(keyword);
+
+        return matchType && matchCategory && matchStatus && matchKeyword;
+      });
+
+      if (list.length === 0) {
+        listResult.innerHTML =
+          '<div class="empty-message">현재 필터 조건에 맞는 상담 신청서가 없습니다.<br>필터를 전체로 바꿔보세요.</div>';
+        return;
+      }
+
+      const rows = list.map(function(item, index) {
+        const typeClass = item["문의유형"] === "MSO" ? "badge-mso" : "badge-edu";
+
+        return `
+          <tr>
+            <td>${escapeHtml(item["접수일시"])}</td>
+            <td>${escapeHtml(item["상담단계"])}</td>
+            <td><span class="badge ${typeClass}">${escapeHtml(item["문의유형"])}</span></td>
+            <td>${escapeHtml(item["세부카테고리"])}</td>
+            <td>${escapeHtml(item["상담상태"])}</td>
+            <td>${escapeHtml(item["병원/기관명"])}</td>
+            <td>${escapeHtml(item["문의자명"])}</td>
+            <td>${escapeHtml(item["연락처"])}</td>
+            <td>${escapeHtml(item["담당자"])}</td>
+            <td>${escapeHtml(item["다음연락일"])}</td>
+            <td>${escapeHtml(item["전환가능성"])}</td>
+            <td>
+              <button type="button" class="secondary" onclick="toggleCrmDetail(${index})">상세</button>
+            </td>
+          </tr>
+          <tr id="crmDetail_${index}" class="detail-row hide">
+            <td colspan="12">
+              ${buildDetailCard(item)}
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      listResult.innerHTML = `
+        <table class="crm-table">
+          <thead>
+            <tr>
+              <th>접수일시</th>
+              <th>상담단계</th>
+              <th>문의유형</th>
+              <th>세부</th>
+              <th>상담상태</th>
+              <th>병원/기관명</th>
+              <th>문의자</th>
+              <th>연락처</th>
+              <th>담당자</th>
+              <th>다음 연락일</th>
+              <th>전환가능성</th>
+              <th>상세</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function toggleCrmDetail(index) {
+      const row = document.getElementById("crmDetail_" + index);
+      if (!row) return;
+      row.classList.toggle("hide");
+    }
+
+    function buildDetailCard(item) {
+      const category = item["세부카테고리"];
+
+      let categoryDetail = "";
+
+      if (category === "마케팅") {
+        categoryDetail = `
+          <p><strong>주요고민:</strong> ${escapeHtml(item["마케팅_주요고민"])}</p>
+          <p><strong>매출 감소:</strong> ${escapeHtml(item["마케팅_매출감소시점"])} / ${escapeHtml(item["마케팅_전년대비감소율"])}</p>
+          <p><strong>월 신규 환자 수:</strong> ${escapeHtml(item["마케팅_월신규환자수"])}</p>
+          <p><strong>주요 유입 경로:</strong> ${escapeHtml(item["마케팅_주요유입경로"])} / ${escapeHtml(item["마케팅_최근유입변화"])}</p>
+          <p><strong>월 예산:</strong> ${escapeHtml(item["마케팅_월예산"])}</p>
+          <p><strong>주요 진료/수익:</strong> ${escapeHtml(item["마케팅_주요진료수익항목"])}</p>
+          <p><strong>경쟁병원:</strong> ${escapeHtml(item["마케팅_경쟁병원현황"])}</p>
+          <p><strong>현재 운영:</strong> ${escapeHtml(item["마케팅_현재운영현황"])}</p>
+          <p><strong>온라인 진단 메모:</strong> ${escapeHtml(item["마케팅_온라인진단메모"])}</p>
+          <p><strong>개선 희망사항:</strong> ${escapeHtml(item["마케팅_개선희망사항"])}</p>
+        `;
+      } else if (category === "디자인") {
+        categoryDetail = `
+          <p><strong>필요 범위:</strong> ${escapeHtml(item["디자인_필요범위"])}</p>
+          <p><strong>홈페이지 상태:</strong> ${escapeHtml(item["디자인_홈페이지상태"])}</p>
+          <p><strong>브랜드 톤:</strong> ${escapeHtml(item["디자인_브랜드톤"])}</p>
+          <p><strong>현재 문제:</strong> ${escapeHtml(item["디자인_현재문제"])}</p>
+          <p><strong>필요 제작물:</strong> ${escapeHtml(item["디자인_필요제작물"])}</p>
+          <p><strong>레퍼런스:</strong> ${escapeHtml(item["디자인_레퍼런스"])}</p>
+        `;
+      } else if (category === "CS교육") {
+        categoryDetail = `
+          <p><strong>직원 수:</strong> ${escapeHtml(item["CS_직원수"])}</p>
+          <p><strong>정기교육:</strong> ${escapeHtml(item["CS_정기교육여부"])}</p>
+          <p><strong>매뉴얼:</strong> ${escapeHtml(item["CS_매뉴얼구축"])}</p>
+          <p><strong>주요 이슈:</strong> ${escapeHtml(item["CS_주요이슈"])}</p>
+          <p><strong>문제 상세:</strong> ${escapeHtml(item["CS_문제상세"])}</p>
+          <p><strong>교육 희망 방향:</strong> ${escapeHtml(item["CS_교육희망방향"])}</p>
+        `;
+      } else if (category === "운영") {
+        categoryDetail = `
+          <p><strong>의사 수:</strong> ${escapeHtml(item["운영_의사수"])}</p>
+          <p><strong>직원 수:</strong> ${escapeHtml(item["운영_직원수"])}</p>
+          <p><strong>월 평균 내원:</strong> ${escapeHtml(item["운영_월평균내원수"])}</p>
+          <p><strong>원장 업무량:</strong> ${escapeHtml(item["운영_원장업무량"])}</p>
+          <p><strong>매뉴얼 구축:</strong> ${escapeHtml(item["운영_매뉴얼구축"])}</p>
+          <p><strong>운영 우선순위:</strong> ${escapeHtml(item["운영_우선순위"])}</p>
+          <p><strong>현재 문제:</strong> ${escapeHtml(item["운영_현재문제"])}</p>
+          <p><strong>개선 방향:</strong> ${escapeHtml(item["운영_개선방향"])}</p>
+        `;
+      } else {
+        categoryDetail = `
+          <p><strong>교육 과정:</strong> ${escapeHtml(item["교육_과정"])}</p>
+          <p><strong>의사면허:</strong> ${escapeHtml(item["교육_의사면허유무"])}</p>
+          <p><strong>면허번호:</strong> ${escapeHtml(item["교육_면허번호"])}</p>
+          <p><strong>전공/진료과:</strong> ${escapeHtml(item["교육_전공진료과"])}</p>
+          <p><strong>경력:</strong> ${escapeHtml(item["교육_경력"])}</p>
+          <p><strong>술기 경험:</strong> ${escapeHtml(item["교육_술기경험"])}</p>
+          <p><strong>희망 일정:</strong> ${escapeHtml(item["교육_희망일정"])}</p>
+          <p><strong>대상 적합성:</strong> ${escapeHtml(item["교육_대상적합성"])}</p>
+          <p><strong>신청 상태:</strong> ${escapeHtml(item["교육_신청상태"])}</p>
+          <p><strong>교육 목적:</strong> ${escapeHtml(item["교육_교육목적"])}</p>
+          <p><strong>추가 확인사항:</strong> ${escapeHtml(item["교육_추가확인사항"])}</p>
+        `;
+      }
 
       return `
-        <tr>
-          <td>${escapeHtml(item["접수일시"])}</td>
-          <td>${escapeHtml(item["상담단계"])}</td>
-          <td><span class="badge ${typeClass}">${escapeHtml(item["문의유형"])}</span></td>
-          <td>${escapeHtml(item["세부카테고리"])}</td>
-          <td>${escapeHtml(item["상담상태"])}</td>
-          <td>${escapeHtml(item["병원/기관명"])}</td>
-          <td>${escapeHtml(item["문의자명"])}</td>
-          <td>${escapeHtml(item["연락처"])}</td>
-          <td>${escapeHtml(item["담당자"])}</td>
-          <td>${escapeHtml(item["다음연락일"])}</td>
-          <td>${escapeHtml(item["전환가능성"])}</td>
-          <td>
-            <button type="button" class="secondary" onclick="toggleCrmDetail(${index})">상세</button>
-          </td>
-        </tr>
-        <tr id="crmDetail_${index}" class="detail-row hide">
-          <td colspan="12">
-            ${buildDetailCard(item)}
-          </td>
-        </tr>
-      `;
-    }).join("");
-
-    listResult.innerHTML = `
-      <table class="crm-table">
-        <thead>
-          <tr>
-            <th>접수일시</th>
-            <th>상담단계</th>
-            <th>문의유형</th>
-            <th>세부</th>
-            <th>상담상태</th>
-            <th>병원/기관명</th>
-            <th>문의자</th>
-            <th>연락처</th>
-            <th>담당자</th>
-            <th>다음 연락일</th>
-            <th>전환가능성</th>
-            <th>상세</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
-    `;
-  }
-
-  function toggleCrmDetail(index) {
-    const row = document.getElementById("crmDetail_" + index);
-    if (!row) return;
-    row.classList.toggle("hide");
-  }
-
-  function buildDetailCard(item) {
-    const category = item["세부카테고리"];
-
-    let categoryDetail = "";
-
-    if (category === "마케팅") {
-      categoryDetail = `
-        <p><strong>주요고민:</strong> ${escapeHtml(item["마케팅_주요고민"])}</p>
-        <p><strong>매출 감소:</strong> ${escapeHtml(item["마케팅_매출감소시점"])} / ${escapeHtml(item["마케팅_전년대비감소율"])}</p>
-        <p><strong>월 신규 환자 수:</strong> ${escapeHtml(item["마케팅_월신규환자수"])}</p>
-        <p><strong>주요 유입 경로:</strong> ${escapeHtml(item["마케팅_주요유입경로"])} / ${escapeHtml(item["마케팅_최근유입변화"])}</p>
-        <p><strong>월 예산:</strong> ${escapeHtml(item["마케팅_월예산"])}</p>
-        <p><strong>주요 진료/수익:</strong> ${escapeHtml(item["마케팅_주요진료수익항목"])}</p>
-        <p><strong>경쟁병원:</strong> ${escapeHtml(item["마케팅_경쟁병원현황"])}</p>
-        <p><strong>현재 운영:</strong> ${escapeHtml(item["마케팅_현재운영현황"])}</p>
-        <p><strong>온라인 진단 메모:</strong> ${escapeHtml(item["마케팅_온라인진단메모"])}</p>
-        <p><strong>개선 희망사항:</strong> ${escapeHtml(item["마케팅_개선희망사항"])}</p>
-      `;
-    } else if (category === "디자인") {
-      categoryDetail = `
-        <p><strong>필요 범위:</strong> ${escapeHtml(item["디자인_필요범위"])}</p>
-        <p><strong>홈페이지 상태:</strong> ${escapeHtml(item["디자인_홈페이지상태"])}</p>
-        <p><strong>브랜드 톤:</strong> ${escapeHtml(item["디자인_브랜드톤"])}</p>
-        <p><strong>현재 문제:</strong> ${escapeHtml(item["디자인_현재문제"])}</p>
-        <p><strong>필요 제작물:</strong> ${escapeHtml(item["디자인_필요제작물"])}</p>
-        <p><strong>레퍼런스:</strong> ${escapeHtml(item["디자인_레퍼런스"])}</p>
-      `;
-    } else if (category === "CS교육") {
-      categoryDetail = `
-        <p><strong>직원 수:</strong> ${escapeHtml(item["CS_직원수"])}</p>
-        <p><strong>정기교육:</strong> ${escapeHtml(item["CS_정기교육여부"])}</p>
-        <p><strong>매뉴얼:</strong> ${escapeHtml(item["CS_매뉴얼구축"])}</p>
-        <p><strong>주요 이슈:</strong> ${escapeHtml(item["CS_주요이슈"])}</p>
-        <p><strong>문제 상세:</strong> ${escapeHtml(item["CS_문제상세"])}</p>
-        <p><strong>교육 희망 방향:</strong> ${escapeHtml(item["CS_교육희망방향"])}</p>
-      `;
-    } else if (category === "운영") {
-      categoryDetail = `
-        <p><strong>의사 수:</strong> ${escapeHtml(item["운영_의사수"])}</p>
-        <p><strong>직원 수:</strong> ${escapeHtml(item["운영_직원수"])}</p>
-        <p><strong>월 평균 내원:</strong> ${escapeHtml(item["운영_월평균내원수"])}</p>
-        <p><strong>원장 업무량:</strong> ${escapeHtml(item["운영_원장업무량"])}</p>
-        <p><strong>매뉴얼 구축:</strong> ${escapeHtml(item["운영_매뉴얼구축"])}</p>
-        <p><strong>운영 우선순위:</strong> ${escapeHtml(item["운영_우선순위"])}</p>
-        <p><strong>현재 문제:</strong> ${escapeHtml(item["운영_현재문제"])}</p>
-        <p><strong>개선 방향:</strong> ${escapeHtml(item["운영_개선방향"])}</p>
-      `;
-    } else {
-      categoryDetail = `
-        <p><strong>교육 과정:</strong> ${escapeHtml(item["교육_과정"])}</p>
-        <p><strong>의사면허:</strong> ${escapeHtml(item["교육_의사면허유무"])}</p>
-        <p><strong>면허번호:</strong> ${escapeHtml(item["교육_면허번호"])}</p>
-        <p><strong>전공/진료과:</strong> ${escapeHtml(item["교육_전공진료과"])}</p>
-        <p><strong>경력:</strong> ${escapeHtml(item["교육_경력"])}</p>
-        <p><strong>술기 경험:</strong> ${escapeHtml(item["교육_술기경험"])}</p>
-        <p><strong>희망 일정:</strong> ${escapeHtml(item["교육_희망일정"])}</p>
-        <p><strong>대상 적합성:</strong> ${escapeHtml(item["교육_대상적합성"])}</p>
-        <p><strong>신청 상태:</strong> ${escapeHtml(item["교육_신청상태"])}</p>
-        <p><strong>교육 목적:</strong> ${escapeHtml(item["교육_교육목적"])}</p>
-        <p><strong>추가 확인사항:</strong> ${escapeHtml(item["교육_추가확인사항"])}</p>
+        <div class="detail-card">
+          <p><strong>상담ID:</strong> ${escapeHtml(item["상담ID"])}</p>
+          <p><strong>지역:</strong> ${escapeHtml(item["지역"])} / <strong>대표자:</strong> ${escapeHtml(item["대표자/원장명"])}</p>
+          <p><strong>이메일:</strong> ${escapeHtml(item["이메일"])} / <strong>유입경로:</strong> ${escapeHtml(item["유입경로"])}</p>
+          <p><strong>1차 상담 요약:</strong> ${escapeHtml(item["1차 상담 요약"])}</p>
+          <p><strong>상담 메모:</strong> ${escapeHtml(item["상담 메모"])}</p>
+          ${categoryDetail}
+          <p><strong>제안 방향:</strong> ${escapeHtml(item["제안방향"])}</p>
+          <p><strong>예상 예산/매출:</strong> ${escapeHtml(item["예상예산매출"])}</p>
+          <p><strong>다음 액션:</strong> ${escapeHtml(item["다음액션"])}</p>
+          <p><strong>핵심 체크리스트:</strong> ${escapeHtml(item["핵심체크리스트"])}</p>
+          <p><strong>후속 안내사항:</strong> ${escapeHtml(item["후속안내사항"])}</p>
+        </div>
       `;
     }
 
-    return `
-      <div class="detail-card">
-        <p><strong>상담ID:</strong> ${escapeHtml(item["상담ID"])}</p>
-        <p><strong>지역:</strong> ${escapeHtml(item["지역"])} / <strong>대표자:</strong> ${escapeHtml(item["대표자/원장명"])}</p>
-        <p><strong>이메일:</strong> ${escapeHtml(item["이메일"])} / <strong>유입경로:</strong> ${escapeHtml(item["유입경로"])}</p>
-        <p><strong>1차 상담 요약:</strong> ${escapeHtml(item["1차 상담 요약"])}</p>
-        <p><strong>상담 메모:</strong> ${escapeHtml(item["상담 메모"])}</p>
-        ${categoryDetail}
-        <p><strong>제안 방향:</strong> ${escapeHtml(item["제안방향"])}</p>
-        <p><strong>예상 예산/매출:</strong> ${escapeHtml(item["예상예산매출"])}</p>
-        <p><strong>다음 액션:</strong> ${escapeHtml(item["다음액션"])}</p>
-        <p><strong>핵심 체크리스트:</strong> ${escapeHtml(item["핵심체크리스트"])}</p>
-        <p><strong>후속 안내사항:</strong> ${escapeHtml(item["후속안내사항"])}</p>
-      </div>
-    `;
-  }
-
-  function bindListFilters() {
-    const typeEl = document.getElementById("listFilterType");
-    const categoryEl = document.getElementById("listFilterCategory");
-    const statusEl = document.getElementById("listFilterStatus");
-    const keywordEl = document.getElementById("listSearchKeyword");
-
-    if (typeEl) {
-      typeEl.addEventListener("change", function() {
-        if (crmListData.length > 0) renderCrmList();
+    function bindListFilters() {
+      ["listFilterType", "listFilterCategory", "listFilterStatus"].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("change", function() {
+            if (crmListData.length > 0) renderCrmList();
+          });
+        }
       });
+
+      const keywordEl = document.getElementById("listSearchKeyword");
+      if (keywordEl) {
+        keywordEl.addEventListener("input", function() {
+          if (crmListData.length > 0) renderCrmList();
+        });
+      }
     }
 
-    if (categoryEl) {
-      categoryEl.addEventListener("change", function() {
-        if (crmListData.length > 0) renderCrmList();
-      });
-    }
-
-    if (statusEl) {
-      statusEl.addEventListener("change", function() {
-        if (crmListData.length > 0) renderCrmList();
-      });
-    }
-
-    if (keywordEl) {
-      keywordEl.addEventListener("input", function() {
-        if (crmListData.length > 0) renderCrmList();
-      });
-    }
-  }
-
-  bindListFilters();
-  updateInquiryType();
-</script>
+    bindListFilters();
+    updateInquiryType();
+  </script>
+</body>
+</html>
