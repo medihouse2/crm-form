@@ -1130,6 +1130,7 @@
   const crmForm = document.getElementById("crmForm");
 
   let crmListData = [];
+  let currentRenderedList = [];
 
   const categories = {
     "MSO": ["마케팅", "디자인", "CS교육", "운영"],
@@ -1410,98 +1411,102 @@
       + "&t=" + Date.now();
   }
 
-  function renderCrmList() {
-    const listResult = document.getElementById("listResult");
+function renderCrmList() {
+  const listResult = document.getElementById("listResult");
 
-    if (!listResult) return;
+  if (!listResult) return;
 
-    const typeEl = document.getElementById("listFilterType");
-    const categoryEl = document.getElementById("listFilterCategory");
-    const statusEl = document.getElementById("listFilterStatus");
-    const keywordEl = document.getElementById("listSearchKeyword");
+  const typeEl = document.getElementById("listFilterType");
+  const categoryEl = document.getElementById("listFilterCategory");
+  const statusEl = document.getElementById("listFilterStatus");
+  const keywordEl = document.getElementById("listSearchKeyword");
 
-    const type = typeEl ? typeEl.value : "";
-    const category = categoryEl ? categoryEl.value : "";
-    const status = statusEl ? statusEl.value : "";
-    const keyword = keywordEl ? keywordEl.value.trim().toLowerCase() : "";
+  const type = typeEl ? typeEl.value : "";
+  const category = categoryEl ? categoryEl.value : "";
+  const status = statusEl ? statusEl.value : "";
+  const keyword = keywordEl ? keywordEl.value.trim().toLowerCase() : "";
 
-    const list = crmListData.filter(function(item) {
-      const matchType = !type || item["문의유형"] === type;
-      const matchCategory = !category || item["세부카테고리"] === category;
-      const matchStatus = !status || item["상담상태"] === status;
+  const list = crmListData.filter(function(item) {
+    const matchType = !type || item["문의유형"] === type;
+    const matchCategory = !category || item["세부카테고리"] === category;
+    const matchStatus = !status || item["상담상태"] === status;
 
-      const searchText = [
-        item["상담ID"],
-        item["병원/기관명"],
-        item["대표자/원장명"],
-        item["문의자명"],
-        item["연락처"],
-        item["담당자"],
-        item["지역"],
-        item["1차 상담 요약"],
-        item["상담 메모"]
-      ].join(" ").toLowerCase();
+    const searchText = [
+      item["상담ID"],
+      item["병원/기관명"],
+      item["대표자/원장명"],
+      item["문의자명"],
+      item["연락처"],
+      item["담당자"],
+      item["지역"],
+      item["1차 상담 요약"],
+      item["상담 메모"]
+    ].join(" ").toLowerCase();
 
-      const matchKeyword = !keyword || searchText.includes(keyword);
+    const matchKeyword = !keyword || searchText.includes(keyword);
 
-      return matchType && matchCategory && matchStatus && matchKeyword;
-    });
+    return matchType && matchCategory && matchStatus && matchKeyword;
+  });
 
-    if (list.length === 0) {
-      listResult.innerHTML = '<div class="empty-message">현재 필터 조건에 맞는 상담 신청서가 없습니다.<br>필터를 전체로 바꿔보세요.</div>';
-      return;
-    }
+  currentRenderedList = list;
 
-    let html = "";
-    html += '<table class="crm-table">';
-    html += '<thead>';
-    html += '<tr>';
-    html += '<th>접수일시</th>';
-    html += '<th>상담단계</th>';
-    html += '<th>문의유형</th>';
-    html += '<th>세부</th>';
-    html += '<th>상담상태</th>';
-    html += '<th>병원/기관명</th>';
-    html += '<th>문의자</th>';
-    html += '<th>연락처</th>';
-    html += '<th>담당자</th>';
-    html += '<th>다음 연락일</th>';
-    html += '<th>전환가능성</th>';
-    html += '<th>상세</th>';
-    html += '</tr>';
-    html += '</thead>';
-    html += '<tbody>';
-
-    list.forEach(function(item, index) {
-      const typeClass = item["문의유형"] === "MSO" ? "badge-mso" : "badge-edu";
-
-      html += '<tr>';
-      html += '<td>' + escapeHtml(item["접수일시"]) + '</td>';
-      html += '<td>' + escapeHtml(item["상담단계"]) + '</td>';
-      html += '<td><span class="badge ' + typeClass + '">' + escapeHtml(item["문의유형"]) + '</span></td>';
-      html += '<td>' + escapeHtml(item["세부카테고리"]) + '</td>';
-      html += '<td>' + escapeHtml(item["상담상태"]) + '</td>';
-      html += '<td>' + escapeHtml(item["병원/기관명"]) + '</td>';
-      html += '<td>' + escapeHtml(item["문의자명"]) + '</td>';
-      html += '<td>' + escapeHtml(item["연락처"]) + '</td>';
-      html += '<td>' + escapeHtml(item["담당자"]) + '</td>';
-      html += '<td>' + escapeHtml(item["다음연락일"]) + '</td>';
-      html += '<td>' + escapeHtml(item["전환가능성"]) + '</td>';
-      html += '<td><button type="button" class="secondary" onclick="toggleCrmDetail(' + index + ')">상세</button></td>';
-      html += '</tr>';
-
-      html += '<tr id="crmDetail_' + index + '" class="detail-row hide">';
-      html += '<td colspan="12">';
-      html += buildDetailCard(item);
-      html += '</td>';
-      html += '</tr>';
-    });
-
-    html += '</tbody>';
-    html += '</table>';
-
-    listResult.innerHTML = html;
+  if (list.length === 0) {
+    listResult.innerHTML = '<div class="empty-message">현재 필터 조건에 맞는 상담 신청서가 없습니다.<br>필터를 전체로 바꿔보세요.</div>';
+    return;
   }
+
+  let html = "";
+  html += '<table class="crm-table">';
+  html += '<thead>';
+  html += '<tr>';
+  html += '<th>접수일시</th>';
+  html += '<th>상담단계</th>';
+  html += '<th>문의유형</th>';
+  html += '<th>세부</th>';
+  html += '<th>상담상태</th>';
+  html += '<th>병원/기관명</th>';
+  html += '<th>문의자</th>';
+  html += '<th>연락처</th>';
+  html += '<th>담당자</th>';
+  html += '<th>다음 연락일</th>';
+  html += '<th>전환가능성</th>';
+  html += '<th>폼 불러오기</th>';
+  html += '<th>상세</th>';
+  html += '</tr>';
+  html += '</thead>';
+  html += '<tbody>';
+
+  list.forEach(function(item, index) {
+    const typeClass = item["문의유형"] === "MSO" ? "badge-mso" : "badge-edu";
+
+    html += '<tr>';
+    html += '<td>' + escapeHtml(item["접수일시"]) + '</td>';
+    html += '<td>' + escapeHtml(item["상담단계"]) + '</td>';
+    html += '<td><span class="badge ' + typeClass + '">' + escapeHtml(item["문의유형"]) + '</span></td>';
+    html += '<td>' + escapeHtml(item["세부카테고리"]) + '</td>';
+    html += '<td>' + escapeHtml(item["상담상태"]) + '</td>';
+    html += '<td>' + escapeHtml(item["병원/기관명"]) + '</td>';
+    html += '<td>' + escapeHtml(item["문의자명"]) + '</td>';
+    html += '<td>' + escapeHtml(item["연락처"]) + '</td>';
+    html += '<td>' + escapeHtml(item["담당자"]) + '</td>';
+    html += '<td>' + escapeHtml(item["다음연락일"]) + '</td>';
+    html += '<td>' + escapeHtml(item["전환가능성"]) + '</td>';
+    html += '<td><button type="button" class="primary" onclick="fillCrmFormFromList(' + index + ')">폼에 불러오기</button></td>';
+    html += '<td><button type="button" class="secondary" onclick="toggleCrmDetail(' + index + ')">상세</button></td>';
+    html += '</tr>';
+
+    html += '<tr id="crmDetail_' + index + '" class="detail-row hide">';
+    html += '<td colspan="13">';
+    html += buildDetailCard(item);
+    html += '</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody>';
+  html += '</table>';
+
+  listResult.innerHTML = html;
+}
 
   function toggleCrmDetail(index) {
     const row = document.getElementById("crmDetail_" + index);
@@ -1513,6 +1518,93 @@
     return '<p><strong>' + escapeHtml(label) + ':</strong> ' + escapeHtml(value) + '</p>';
   }
 
+  function fillCrmFormFromList(index) {
+  const item = currentRenderedList[index];
+
+  if (!item) {
+    alert("불러올 상담 데이터를 찾을 수 없습니다.");
+    return;
+  }
+
+  fillCrmForm(item);
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+  showMessage(
+    "ok",
+    "선택한 상담 신청서를 위 상담폼에 불러왔습니다. 내용을 수정한 뒤 CRM 상담 저장을 눌러주세요."
+  );
+}
+
+function fillCrmForm(item) {
+  if (!crmForm) return;
+
+  crmForm.reset();
+
+  const inquiryValue = item["문의유형"] || "";
+  const categoryValue = item["세부카테고리"] || "";
+
+  const inquiryEl = crmForm.querySelector('[name="문의유형"]');
+  if (inquiryEl) {
+    inquiryEl.value = inquiryValue;
+  }
+
+  updateInquiryType();
+
+  const categoryEl = crmForm.querySelector('[name="세부카테고리"]');
+  if (categoryEl) {
+    categoryEl.value = categoryValue;
+  }
+
+  updateDetailSection();
+
+  Object.keys(item).forEach(function(key) {
+    if (key === "상담ID" || key === "접수일시") return;
+    fillFormField(key, item[key]);
+  });
+}
+
+function fillFormField(name, value) {
+  const fields = crmForm.querySelectorAll('[name="' + cssEscapeName(name) + '"]');
+
+  if (!fields || fields.length === 0) return;
+
+  const firstField = fields[0];
+  const fieldType = firstField.type;
+
+  if (fieldType === "checkbox") {
+    const values = String(value || "")
+      .split(",")
+      .map(function(v) {
+        return v.trim();
+      })
+      .filter(Boolean);
+
+    fields.forEach(function(field) {
+      field.checked = values.indexOf(field.value) !== -1;
+    });
+
+    return;
+  }
+
+  if (fieldType === "radio") {
+    fields.forEach(function(field) {
+      field.checked = String(field.value) === String(value || "");
+    });
+
+    return;
+  }
+
+  firstField.value = value || "";
+}
+
+function cssEscapeName(name) {
+  return String(name).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+  
   function buildDetailCard(item) {
     let html = "";
 
